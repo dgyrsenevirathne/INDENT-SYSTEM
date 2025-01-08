@@ -1,13 +1,7 @@
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
-}
-
-h2 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 30px;
+    padding: 0 20px;
 }
 
 .form-row {
@@ -68,7 +62,7 @@ h2 {
 
 button[type="submit"] {
     padding: 12px 40px;
-    background-color: #4CAF50;
+    background-color: #45a049;
     color: white;
     border: none;
     border-radius: 4px;
@@ -79,7 +73,7 @@ button[type="submit"] {
 }
 
 button[type="submit"]:hover {
-    background-color: #45a049;
+    background-color: #57576d;
 }
 
 /* Responsive adjustments */
@@ -91,5 +85,79 @@ button[type="submit"]:hover {
     .form-row {
         gap: 15px;
         margin-bottom: 15px;
+    }
+}
+
+.nav-wrapper {
+    background: #2C3E50;
+    /* Solid color instead of gradient */
+    padding: 15px 0;
+    /* Reduced padding */
+    margin-bottom: 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    /* Subtler shadow */
+    border-radius: 0;
+    /* Removed rounded corners */
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    /* Added flex to align title and tabs */
+    align-items: center;
+    justify-content: space-between;
+}
+
+.nav-title {
+    color: white;
+    font-size: 20px;
+    /* Slightly smaller font */
+    margin: 0;
+    font-weight: 500;
+}
+
+.nav-tabs {
+    display: flex;
+    gap: 20px;
+    /* Increased gap between tabs */
+    margin: 0;
+    /* Removed top margin */
+}
+
+.nav-tab {
+    padding: 8px 16px;
+    /* Reduced padding */
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    border-radius: 4px;
+    /* Smaller border radius */
+    transition: all 0.2s ease;
+    font-size: 14px;
+    /* Smaller font size */
+}
+
+.nav-tab:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-tab.active {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-weight: 500;
+}
+
+/* Add responsive styles for navigation */
+@media (max-width: 768px) {
+    .nav-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .nav-tabs {
+        width: 100%;
+        justify-content: center;
     }
 }

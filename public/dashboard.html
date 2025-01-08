@@ -41,28 +41,21 @@
         .numeric-cell {
             text-align: right;
         }
-
-        .button {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #1976D2;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            transition: background-color 0.3s ease;
-        }
-
-        .button:hover {
-            background-color: #0D47A1;
-        }
     </style>
 </head>
 
 <body>
+    <div class="nav-wrapper">
+        <div class="nav-container">
+            <h1 class="nav-title">Indent Management System</h1>
+            <div class="nav-tabs">
+                <a href="index.html" class="nav-tab">Create Indent</a>
+                <a href="dashboard.html" class="nav-tab active">Dashboard</a>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
-        <h2>Indent Management Dashboard</h2>
-        <a href="index.html" class="button">Create New Indent</a>
         <table id="indentsTable">
             <thead>
                 <tr>
