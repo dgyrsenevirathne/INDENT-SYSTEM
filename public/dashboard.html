@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indent Management Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #F5F5F5;
+            color: black;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .container {
+            overflow-x: auto;
+            max-width: 100%;
+        }
+
+        .numeric-cell {
+            text-align: right;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #1976D2;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #0D47A1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Indent Management Dashboard</h2>
+        <a href="index.html" class="button">Create New Indent</a>
+        <table id="indentsTable">
+            <thead>
+                <tr>
+                    <th>Indent No</th>
+                    <th>Date</th>
+                    <th>Currency</th>
+                    <th>Value</th>
+                    <th>Base Value</th>
+                    <th>VALUE</th>
+                    <th>Reimbursement</th>
+                    <th>Harring and Transport</th>
+                    <th>VAT</th>
+                    <th>RAT</th>
+                    <th>Advance</th>
+                    <th>Commission</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Will be populated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+    <script>
+        async function loadIndents() {
+            try {
+                const response = await fetch('/api/indents');
+                const indents = await response.json();
+                const tbody = document.querySelector('#indentsTable tbody');
+
+                tbody.innerHTML = indents.map(indent => `
+                    <tr>
+                        <td>${indent.IndentNo}</td>
+                        <td>${new Date(indent.IndentDate).toLocaleDateString()}</td>
+                        <td>${indent.Currency}</td>
+                        <td class="numeric-cell">${formatNumber(indent.Value)}</td>
+                        <td class="numeric-cell">${formatNumber(indent.BaseValue)}</td>
+                        <td class="numeric-cell">${formatNumber(indent.Value)}</td>
+                        <td class="numeric-cell">${formatNumber(indent.Reimbursement)}</td>
+                        <td class="numeric-cell">${formatNumber(indent.HarringAndTransport)}</td>
+                        <td class="numeric-cell">${formatNumber(indent.VAT)}</td>
+                        <td class="numeric-cell">${formatNumber(indent.RAT)}</td>
+                        <td class="numeric-cell">${formatNumber(indent.Advance)}</td>
+                        <td class="numeric-cell">${formatNumber(indent.Commission)}</td>
+                        <td class="numeric-cell">${formatNumber(indent.Total)}</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading indents:', error);
+            }
+        }
+
+        // Function to format numbers with commas and 2 decimal places
+        function formatNumber(number) {
+            return number ? number.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }) : '0.00';
+        }
+
+        document.addEventListener('DOMContentLoaded', loadIndents);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indent Management System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <form id="indentForm">
+            <!-- First Row -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="indentNo">Indent No:</label>
+                    <input type="text" id="indentNo" required>
+                </div>
+                <div class="form-group">
+                    <label for="complexRef">Complex Reference:</label>
+                    <input type="text" id="complexRef">
+                </div>
+                <div class="form-group">
+                    <label for="date">Date:</label>
+                    <input type="date" id="date" required>
+                </div>
+                <div class="form-group">
+                    <label for="currency">Currency:</label>
+                    <select id="currency" required>
+                        <option value="USD">USD</option>
+                        <option value="POUND">POUND</option>
+                        <option value="EURO">EURO</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Second Row -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="baseValue">Base Value:</label>
+                    <input type="number" id="baseValue" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="value">VALUE:</label>
+                    <input type="number" id="value" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="reimbursement">Reimbursement:</label>
+                    <input type="number" id="reimbursement" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="harringTransport">Harring and Transport:</label>
+                    <input type="number" id="harringTransport" step="0.01" required>
+                </div>
+            </div>
+
+            <!-- Third Row -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="vat">VAT:</label>
+                    <input type="number" id="vat" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="rat">RAT:</label>
+                    <input type="number" id="rat" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="advance">Advance:</label>
+                    <input type="number" id="advance" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="commission">Commission:</label>
+                    <input type="number" id="commission" step="0.01" required>
+                </div>
+            </div>
+
+            <!-- Fourth Row -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="total">Total:</label>
+                    <input type="number" id="total" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="psCode">PS-CODE:</label>
+                    <input type="text" id="psCode" required>
+                </div>
+                <div class="form-group">
+                    <label for="complex">COMPLEX:</label>
+                    <input type="text" id="complex" required>
+                </div>
+            </div>
+
+            <!-- Fifth Row -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="item">Item:</label>
+                    <textarea id="item" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="supplier">Supplier:</label>
+                    <select id="supplier" required>
+                        <!-- Will be populated from database -->
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <button type="submit">Submit</button>
+            </div>
+        </form>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
