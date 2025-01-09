@@ -62,7 +62,6 @@
                     <th>Indent No</th>
                     <th>Date</th>
                     <th>Currency</th>
-                    <th>Value</th>
                     <th>Base Value</th>
                     <th>VALUE</th>
                     <th>Reimbursement</th>
@@ -72,12 +71,24 @@
                     <th>Advance</th>
                     <th>Commission</th>
                     <th>Total</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
                 <!-- Will be populated by JavaScript -->
             </tbody>
         </table>
+    </div>
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Indent Details</h2>
+            <div class="modal-body">
+                <p><strong>Complex Reference:</strong> <span id="modalComplexRef"></span></p>
+                <p><strong>Item:</strong> <span id="modalItem"></span></p>
+                <p><strong>Supplier:</strong> <span id="modalSupplier"></span></p>
+            </div>
+        </div>
     </div>
     <script>
         async function loadIndents() {
@@ -91,7 +102,6 @@
                         <td>${indent.IndentNo}</td>
                         <td>${new Date(indent.IndentDate).toLocaleDateString()}</td>
                         <td>${indent.Currency}</td>
-                        <td class="numeric-cell">${formatNumber(indent.Value)}</td>
                         <td class="numeric-cell">${formatNumber(indent.BaseValue)}</td>
                         <td class="numeric-cell">${formatNumber(indent.Value)}</td>
                         <td class="numeric-cell">${formatNumber(indent.Reimbursement)}</td>
@@ -101,10 +111,33 @@
                         <td class="numeric-cell">${formatNumber(indent.Advance)}</td>
                         <td class="numeric-cell">${formatNumber(indent.Commission)}</td>
                         <td class="numeric-cell">${formatNumber(indent.Total)}</td>
+                        <td>
+                        <button class="details-btn" onclick="showDetails('${indent.ComplexReference}', '${indent.Item.replace(/'/g, "\\'")}', '${indent.SupplierName}')">
+                            Details
+                        </button>
+                    </td>
                     </tr>
                 `).join('');
             } catch (error) {
                 console.error('Error loading indents:', error);
+            }
+        }
+
+        function showDetails(complexRef, item, supplier) {
+            document.getElementById('modalComplexRef').textContent = complexRef || 'N/A';
+            document.getElementById('modalItem').textContent = item || 'N/A';
+            document.getElementById('modalSupplier').textContent = supplier || 'N/A';
+            document.getElementById('detailsModal').style.display = 'block';
+        }
+
+        document.querySelector('.close').onclick = function () {
+            document.getElementById('detailsModal').style.display = 'none';
+        }
+
+        window.onclick = function (event) {
+            const modal = document.getElementById('detailsModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
             }
         }
 

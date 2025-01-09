@@ -86,7 +86,7 @@ app.get('/api/indents', async (req, res) => {
         const result = await sql.query(`
             SELECT i.*, s.SupplierName 
             FROM Indents i 
-            JOIN Suppliers s ON i.SupplierID = s.SupplierID
+            LEFT JOIN Suppliers s ON i.SupplierID = s.SupplierID
         `);
         res.json(result.recordset);
     } catch (err) {
