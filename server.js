@@ -32,47 +32,106 @@ app.get('/api/suppliers', async (req, res) => {
 app.post('/api/indents', async (req, res) => {
     try {
         await sql.connect(sqlConfig);
-        const request = new sql.Request();
+        const transaction = new sql.Transaction();
+        await transaction.begin();
 
-        console.log('Form Data:', req.body);
+        try {
+            const request = new sql.Request(transaction);
 
-        const query = `
-            INSERT INTO Indents (
-                IndentNo, ComplexReference, IndentDate, Currency, BaseValue,
-                Value, Reimbursement, HarringAndTransport, VAT, RAT,
-                Advance, Commission, Total, PSCode, Complex, Item, SupplierID
-            )
-            VALUES (
-                @indentNo, @complexRef, @date, @currency, @baseValue,
-                @value, @reimbursement, @harringTransport, @vat, @rat,
-                @advance, @commission, @total, @psCode, @complex, @item, @supplierId
-            )
-        `;
+            // First check if the indent number exists with Status = 0
+            const checkQuery = `
+                SELECT IndentNo FROM Indents 
+                WHERE IndentNo = @indentNo AND Status = 0
+            `;
 
-        console.log('SQL Query:', query);
+            request.input('indentNo', sql.VarChar, req.body.indentNo);
+            const existingIndent = await request.query(checkQuery);
 
-        // Add parameters
-        request.input('indentNo', sql.VarChar, req.body.indentNo);
-        request.input('complexRef', sql.VarChar, req.body.complexRef);
-        request.input('date', sql.Date, new Date(req.body.date));
-        request.input('currency', sql.VarChar, req.body.currency);
-        request.input('baseValue', sql.Decimal, req.body.baseValue);
-        request.input('value', sql.Decimal, req.body.value);
-        request.input('reimbursement', sql.Decimal, req.body.reimbursement);
-        request.input('harringTransport', sql.Decimal, req.body.harringTransport);
-        request.input('vat', sql.Decimal, req.body.vat);
-        request.input('rat', sql.Decimal, req.body.rat);
-        request.input('advance', sql.Decimal, req.body.advance);
-        request.input('commission', sql.Decimal, req.body.commission);
-        request.input('total', sql.Decimal, req.body.total);
-        request.input('psCode', sql.VarChar, req.body.psCode);
-        request.input('complex', sql.VarChar, req.body.complex);
-        request.input('item', sql.NVarChar(sql.MAX), req.body.item); // Updated to NVARCHAR(MAX)
-        request.input('supplierId', sql.Int, req.body.supplierId);
+            if (existingIndent.recordset.length > 0) {
+                // Update existing record instead of creating new one
+                const updateQuery = `
+                    UPDATE Indents SET
+                        ComplexReference = @complexRef,
+                        IndentDate = @date,
+                        Currency = @currency,
+                        BaseValue = @baseValue,
+                        Value = @value,
+                        Reimbursement = @reimbursement,
+                        HarringAndTransport = @harringTransport,
+                        VAT = @vat,
+                        RAT = @rat,
+                        Advance = @advance,
+                        Commission = @commission,
+                        Total = @total,
+                        PSCode = @psCode,
+                        Complex = @complex,
+                        Item = @item,
+                        SupplierID = @supplierId,
+                        Status = 1
+                    WHERE IndentNo = @indentNo
+                `;
 
-        const result = await request.query(query);
-        console.log('Indent saved successfully:', result);
-        res.json({ success: true });
+                // Add remaining parameters
+                request.input('complexRef', sql.VarChar, req.body.complexRef);
+                request.input('date', sql.Date, new Date(req.body.date));
+                request.input('currency', sql.VarChar, req.body.currency);
+                request.input('baseValue', sql.Decimal, req.body.baseValue);
+                request.input('value', sql.Decimal, req.body.value);
+                request.input('reimbursement', sql.Decimal, req.body.reimbursement);
+                request.input('harringTransport', sql.Decimal, req.body.harringTransport);
+                request.input('vat', sql.Decimal, req.body.vat);
+                request.input('rat', sql.Decimal, req.body.rat);
+                request.input('advance', sql.Decimal, req.body.advance);
+                request.input('commission', sql.Decimal, req.body.commission);
+                request.input('total', sql.Decimal, req.body.total);
+                request.input('psCode', sql.VarChar, req.body.psCode);
+                request.input('complex', sql.VarChar, req.body.complex);
+                request.input('item', sql.NVarChar(sql.MAX), req.body.item);
+                request.input('supplierId', sql.Int, req.body.supplierId);
+
+                await request.query(updateQuery);
+            } else {
+                // Original insert logic for new records
+                const insertQuery = `
+                    INSERT INTO Indents (
+                        IndentNo, ComplexReference, IndentDate, Currency, BaseValue,
+                        Value, Reimbursement, HarringAndTransport, VAT, RAT,
+                        Advance, Commission, Total, PSCode, Complex, Item, SupplierID, Status
+                    )
+                    VALUES (
+                        @indentNo, @complexRef, @date, @currency, @baseValue,
+                        @value, @reimbursement, @harringTransport, @vat, @rat,
+                        @advance, @commission, @total, @psCode, @complex, @item, @supplierId, 1
+                    )
+                `;
+
+                // Add parameters (same as above)
+                request.input('complexRef', sql.VarChar, req.body.complexRef);
+                request.input('date', sql.Date, new Date(req.body.date));
+                request.input('currency', sql.VarChar, req.body.currency);
+                request.input('baseValue', sql.Decimal, req.body.baseValue);
+                request.input('value', sql.Decimal, req.body.value);
+                request.input('reimbursement', sql.Decimal, req.body.reimbursement);
+                request.input('harringTransport', sql.Decimal, req.body.harringTransport);
+                request.input('vat', sql.Decimal, req.body.vat);
+                request.input('rat', sql.Decimal, req.body.rat);
+                request.input('advance', sql.Decimal, req.body.advance);
+                request.input('commission', sql.Decimal, req.body.commission);
+                request.input('total', sql.Decimal, req.body.total);
+                request.input('psCode', sql.VarChar, req.body.psCode);
+                request.input('complex', sql.VarChar, req.body.complex);
+                request.input('item', sql.NVarChar(sql.MAX), req.body.item);
+                request.input('supplierId', sql.Int, req.body.supplierId);
+
+                await request.query(insertQuery);
+            }
+
+            await transaction.commit();
+            res.json({ success: true });
+        } catch (err) {
+            await transaction.rollback();
+            throw err;
+        }
     } catch (err) {
         console.error('Error saving indent:', err);
         res.status(500).json({ error: err.message });
