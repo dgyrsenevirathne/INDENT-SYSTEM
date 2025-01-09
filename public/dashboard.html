@@ -77,9 +77,11 @@
                         <td class="numeric-cell">${formatNumber(indent.Commission)}</td>
                         <td class="numeric-cell">${formatNumber(indent.Total)}</td>
                         <td>
-                        <button class="details-btn" onclick="showDetails('${indent.ComplexReference}', '${indent.Item.replace(/'/g, "\\'")}', '${indent.SupplierName}')">
-                            Details
-                        </button>
+                         <button class="details-btn" data-complex-ref="${indent.ComplexReference}" 
+                         data-item="${indent.Item}" 
+                         data-supplier="${indent.SupplierName}">
+                         Details
+                         </button>
                         <button class="add-btn" onclick="addValues('${indent.IndentNo}')">
                             Add
                         </button>
@@ -112,6 +114,17 @@
                 modal.style.display = 'none';
             }
         }
+
+        document.addEventListener('click', function (e) {
+            if (e.target.matches('.details-btn')) {
+                const button = e.target;
+                showDetails(
+                    button.dataset.complexRef,
+                    button.dataset.item,
+                    button.dataset.supplier
+                );
+            }
+        });
 
         // Function to format numbers with commas and 2 decimal places
         function formatNumber(number) {
