@@ -87,6 +87,7 @@ app.get('/api/indents', async (req, res) => {
             SELECT i.*, s.SupplierName 
             FROM Indents i 
             LEFT JOIN Suppliers s ON i.SupplierID = s.SupplierID
+            WHERE i.Status = 1
         `);
         res.json(result.recordset);
     } catch (err) {
@@ -198,6 +199,44 @@ app.post('/api/addindents', async (req, res) => {
     }
 });
 
+app.put('/api/indents/:indentNo/status', async (req, res) => {
+    try {
+        await sql.connect(sqlConfig);
+        const request = new sql.Request();
+
+        // Clean the indent number by removing all spaces
+        const indentNo = decodeURIComponent(req.params.indentNo).replace(/\s+/g, '');
+
+        // Modified query to handle potential spacing differences
+        const query = `
+            UPDATE Indents
+            SET Status = 0
+            WHERE REPLACE(IndentNo, ' ', '') = @indentNo
+        `;
+
+        request.input('indentNo', sql.VarChar, indentNo);
+
+        console.log('Attempting to delete indent:', indentNo); // Debug log
+
+        // First, let's verify if the record exists
+        const checkQuery = `SELECT IndentNo FROM Indents WHERE REPLACE(IndentNo, ' ', '') = @indentNo`;
+        const checkResult = await request.query(checkQuery);
+
+        if (checkResult.recordset.length === 0) {
+            console.log('Record not found in database. Available records:');
+            // Debug: List all indent numbers for comparison
+            const allIndents = await request.query('SELECT IndentNo FROM Indents');
+            console.log(allIndents.recordset.map(r => r.IndentNo));
+            return res.status(404).json({ message: 'Indent not found' });
+        }
+
+        const result = await request.query(query);
+        res.json({ success: true, message: 'Indent deleted successfully' });
+    } catch (err) {
+        console.error('Error updating indent status:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

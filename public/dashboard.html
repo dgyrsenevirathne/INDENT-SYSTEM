@@ -85,6 +85,9 @@
                         <button class="add-btn" onclick="addValues('${indent.IndentNo}')">
                             Add
                         </button>
+                         <button class="delete-btn" onclick="deleteIndent('${indent.IndentNo}')">
+                            Delete
+                        </button>
                     </td>
                     </tr>
                 `).join('');
@@ -132,6 +135,38 @@
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             }) : '0.00';
+        }
+
+        async function deleteIndent(indentNo) {
+            if (confirm('Are you sure you want to delete this indent?')) {
+                try {
+                    // Remove all spaces from the indent number
+                    const cleanIndentNo = indentNo.replace(/\s+/g, '');
+                    const encodedIndentNo = encodeURIComponent(cleanIndentNo);
+
+                    console.log('Original indent number:', indentNo);
+                    console.log('Cleaned indent number:', cleanIndentNo);
+
+                    const response = await fetch(`/api/indents/${encodedIndentNo}/status`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Failed to delete indent');
+                    }
+
+                    alert(data.message || 'Indent deleted successfully');
+                    loadIndents(); // Reload the table
+                } catch (error) {
+                    console.error('Delete error:', error); // Debug log
+                    alert('Error deleting indent: ' + error.message);
+                }
+            }
         }
 
         document.addEventListener('DOMContentLoaded', loadIndents);
