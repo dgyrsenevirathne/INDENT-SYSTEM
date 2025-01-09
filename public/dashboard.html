@@ -5,43 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Indent Management Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            overflow-x: auto;
-        }
-
-        th,
-        td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-            white-space: nowrap;
-        }
-
-        th {
-            background-color: #F5F5F5;
-            color: black;
-            position: sticky;
-            top: 0;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-
-        .container {
-            overflow-x: auto;
-            max-width: 100%;
-        }
-
-        .numeric-cell {
-            text-align: right;
-        }
-    </style>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/dashboard.css">
 </head>
 
 <body>
@@ -115,12 +80,19 @@
                         <button class="details-btn" onclick="showDetails('${indent.ComplexReference}', '${indent.Item.replace(/'/g, "\\'")}', '${indent.SupplierName}')">
                             Details
                         </button>
+                        <button class="add-btn" onclick="addValues('${indent.IndentNo}')">
+                            Add
+                        </button>
                     </td>
                     </tr>
                 `).join('');
             } catch (error) {
                 console.error('Error loading indents:', error);
             }
+        }
+
+        function addValues(indentNo) {
+            window.location.href = `/addform.html?indentNo=${indentNo}`;
         }
 
         function showDetails(complexRef, item, supplier) {
