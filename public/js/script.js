@@ -48,6 +48,7 @@ async function handleSubmit(e) {
 
     const formData = {
         indentNo: document.getElementById('indentNo').value,
+        refTvNo: document.getElementById('refTvNo').value,
         complexRef: document.getElementById('complexRef').value,
         date: document.getElementById('date').value,
         currency: document.getElementById('currency').value,

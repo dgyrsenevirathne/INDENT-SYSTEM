@@ -38,18 +38,35 @@ app.post('/api/indents', async (req, res) => {
         try {
             const request = new sql.Request(transaction);
 
-            // First check if the indent number exists with Status = 0
+            // Add all parameters once
+            request.input('indentNo', sql.VarChar, req.body.indentNo);
+            request.input('refTvNo', sql.VarChar, req.body.refTvNo);
+            request.input('complexRef', sql.VarChar, req.body.complexRef);
+            request.input('date', sql.Date, new Date(req.body.date));
+            request.input('currency', sql.VarChar, req.body.currency);
+            request.input('baseValue', sql.Decimal, req.body.baseValue);
+            request.input('value', sql.Decimal, req.body.value);
+            request.input('reimbursement', sql.Decimal, req.body.reimbursement);
+            request.input('harringTransport', sql.Decimal, req.body.harringTransport);
+            request.input('vat', sql.Decimal, req.body.vat);
+            request.input('nbt', sql.Decimal, req.body.nbt);
+            request.input('advance', sql.Decimal, req.body.advance);
+            request.input('commission', sql.Decimal, req.body.commission);
+            request.input('total', sql.Decimal, req.body.total);
+            request.input('complex', sql.VarChar, req.body.complex);
+            request.input('item', sql.NVarChar(sql.MAX), req.body.item);
+            request.input('supplierId', sql.Int, req.body.supplierId);
+
+            // Check existing indent
             const checkQuery = `
                 SELECT IndentNo FROM Indents 
                 WHERE IndentNo = @indentNo AND Status = 0
             `;
-
-            request.input('indentNo', sql.VarChar, req.body.indentNo);
             const existingIndent = await request.query(checkQuery);
 
+            // Handle Indents table
             if (existingIndent.recordset.length > 0) {
-                // Update existing record instead of creating new one
-                const updateQuery = `
+                await request.query(`
                     UPDATE Indents SET
                         ComplexReference = @complexRef,
                         IndentDate = @date,
@@ -68,29 +85,9 @@ app.post('/api/indents', async (req, res) => {
                         SupplierID = @supplierId,
                         Status = 1
                     WHERE IndentNo = @indentNo
-                `;
-
-                // Add remaining parameters
-                request.input('complexRef', sql.VarChar, req.body.complexRef);
-                request.input('date', sql.Date, new Date(req.body.date));
-                request.input('currency', sql.VarChar, req.body.currency);
-                request.input('baseValue', sql.Decimal, req.body.baseValue);
-                request.input('value', sql.Decimal, req.body.value);
-                request.input('reimbursement', sql.Decimal, req.body.reimbursement);
-                request.input('harringTransport', sql.Decimal, req.body.harringTransport);
-                request.input('vat', sql.Decimal, req.body.vat);
-                request.input('nbt', sql.Decimal, req.body.nbt);
-                request.input('advance', sql.Decimal, req.body.advance);
-                request.input('commission', sql.Decimal, req.body.commission);
-                request.input('total', sql.Decimal, req.body.total);
-                request.input('complex', sql.VarChar, req.body.complex);
-                request.input('item', sql.NVarChar(sql.MAX), req.body.item);
-                request.input('supplierId', sql.Int, req.body.supplierId);
-
-                await request.query(updateQuery);
+                `);
             } else {
-                // Original insert logic for new records
-                const insertQuery = `
+                await request.query(`
                     INSERT INTO Indents (
                         IndentNo, ComplexReference, IndentDate, Currency, BaseValue,
                         Value, Reimbursement, HarringAndTransport, VAT, NBT,
@@ -101,26 +98,23 @@ app.post('/api/indents', async (req, res) => {
                         @value, @reimbursement, @harringTransport, @vat, @nbt,
                         @advance, @commission, @total, @complex, @item, @supplierId, 1
                     )
-                `;
+                `);
+            }
 
-                // Add parameters (same as above)
-                request.input('complexRef', sql.VarChar, req.body.complexRef);
-                request.input('date', sql.Date, new Date(req.body.date));
-                request.input('currency', sql.VarChar, req.body.currency);
-                request.input('baseValue', sql.Decimal, req.body.baseValue);
-                request.input('value', sql.Decimal, req.body.value);
-                request.input('reimbursement', sql.Decimal, req.body.reimbursement);
-                request.input('harringTransport', sql.Decimal, req.body.harringTransport);
-                request.input('vat', sql.Decimal, req.body.vat);
-                request.input('nbt', sql.Decimal, req.body.nbt);
-                request.input('advance', sql.Decimal, req.body.advance);
-                request.input('commission', sql.Decimal, req.body.commission);
-                request.input('total', sql.Decimal, req.body.total);
-                request.input('complex', sql.VarChar, req.body.complex);
-                request.input('item', sql.NVarChar(sql.MAX), req.body.item);
-                request.input('supplierId', sql.Int, req.body.supplierId);
-
-                await request.query(insertQuery);
+            // Handle AddIndents table if refTvNo exists
+            if (req.body.refTvNo) {
+                await request.query(`
+                    INSERT INTO AddIndents (
+                        IndentNo, RefTvNo, AddDate, AddCurrency, AddBaseValue,
+                        AddValue, AddReimbursement, AddHarringAndTransport,
+                        AddVAT, AddNBT, AddAdvance, AddCommission, AddTotal
+                    )
+                    VALUES (
+                        @indentNo, @refTvNo, @date, @currency, @baseValue,
+                        @value, @reimbursement, @harringTransport,
+                        @vat, @nbt, @advance, @commission, @total
+                    )
+                `);
             }
 
             await transaction.commit();
