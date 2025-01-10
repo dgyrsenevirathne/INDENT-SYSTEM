@@ -52,6 +52,7 @@
                 <p><strong>Complex Reference:</strong> <span id="modalComplexRef"></span></p>
                 <p><strong>Item:</strong> <span id="modalItem"></span></p>
                 <p><strong>Supplier:</strong> <span id="modalSupplier"></span></p>
+                <p><strong>Indent Type:</strong> <span id="modalIndentType"></span></p>
             </div>
         </div>
     </div>
@@ -79,7 +80,8 @@
                         <td>
                          <button class="details-btn" data-complex-ref="${indent.ComplexReference}" 
                          data-item="${indent.Item}" 
-                         data-supplier="${indent.SupplierName}">
+                         data-supplier="${indent.SupplierName}"
+                         data-indent-type="${indent.IndentType}">
                          Details
                          </button>
                         <button class="add-btn" onclick="addValues('${indent.IndentNo}')">
@@ -100,10 +102,11 @@
             window.location.href = `/addform.html?indentNo=${indentNo}`;
         }
 
-        function showDetails(complexRef, item, supplier) {
+        function showDetails(complexRef, item, supplier, indentType) {
             document.getElementById('modalComplexRef').textContent = complexRef || 'N/A';
             document.getElementById('modalItem').textContent = item || 'N/A';
             document.getElementById('modalSupplier').textContent = supplier || 'N/A';
+            document.getElementById('modalIndentType').textContent = indentType || 'N/A';
             document.getElementById('detailsModal').style.display = 'block';
         }
 
@@ -124,7 +127,8 @@
                 showDetails(
                     button.dataset.complexRef,
                     button.dataset.item,
-                    button.dataset.supplier
+                    button.dataset.supplier,
+                    button.dataset.indentType
                 );
             }
         });
