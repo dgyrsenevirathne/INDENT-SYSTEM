@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Add event listeners for calculation
     const numericInputs = ['addValue', 'addReimbursement', 'addHarringTransport',
-        'addVAT', 'addRAT', 'addAdvance', 'addCommission'];
+        'addVAT', 'addNBT', 'addAdvance', 'addCommission'];
 
     numericInputs.forEach(id => {
         document.getElementById(id).addEventListener('input', calculateTotal);
@@ -25,7 +25,7 @@ function calculateTotal() {
         getValue('addReimbursement') +
         getValue('addHarringTransport') +
         getValue('addVAT') +
-        getValue('addRAT') +
+        getValue('addNBT') +
         getValue('addAdvance') +
         getValue('addCommission');
 
@@ -45,7 +45,7 @@ async function handleSubmit(e) {
         addReimbursement: parseFloat(document.getElementById('addReimbursement').value),
         addHarringTransport: parseFloat(document.getElementById('addHarringTransport').value),
         addVAT: parseFloat(document.getElementById('addVAT').value),
-        addRAT: parseFloat(document.getElementById('addRAT').value),
+        addNBT: parseFloat(document.getElementById('addNBT').value),
         addAdvance: parseFloat(document.getElementById('addAdvance').value),
         addCommission: parseFloat(document.getElementById('addCommission').value),
         addTotal: parseFloat(document.getElementById('addTotal').value)

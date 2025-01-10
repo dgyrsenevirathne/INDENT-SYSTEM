@@ -59,11 +59,10 @@ app.post('/api/indents', async (req, res) => {
                         Reimbursement = @reimbursement,
                         HarringAndTransport = @harringTransport,
                         VAT = @vat,
-                        RAT = @rat,
+                        NBT = @nbt,
                         Advance = @advance,
                         Commission = @commission,
                         Total = @total,
-                        PSCode = @psCode,
                         Complex = @complex,
                         Item = @item,
                         SupplierID = @supplierId,
@@ -80,11 +79,10 @@ app.post('/api/indents', async (req, res) => {
                 request.input('reimbursement', sql.Decimal, req.body.reimbursement);
                 request.input('harringTransport', sql.Decimal, req.body.harringTransport);
                 request.input('vat', sql.Decimal, req.body.vat);
-                request.input('rat', sql.Decimal, req.body.rat);
+                request.input('nbt', sql.Decimal, req.body.rat);
                 request.input('advance', sql.Decimal, req.body.advance);
                 request.input('commission', sql.Decimal, req.body.commission);
                 request.input('total', sql.Decimal, req.body.total);
-                request.input('psCode', sql.VarChar, req.body.psCode);
                 request.input('complex', sql.VarChar, req.body.complex);
                 request.input('item', sql.NVarChar(sql.MAX), req.body.item);
                 request.input('supplierId', sql.Int, req.body.supplierId);
@@ -95,13 +93,13 @@ app.post('/api/indents', async (req, res) => {
                 const insertQuery = `
                     INSERT INTO Indents (
                         IndentNo, ComplexReference, IndentDate, Currency, BaseValue,
-                        Value, Reimbursement, HarringAndTransport, VAT, RAT,
-                        Advance, Commission, Total, PSCode, Complex, Item, SupplierID, Status
+                        Value, Reimbursement, HarringAndTransport, VAT, NBT,
+                        Advance, Commission, Total, Complex, Item, SupplierID, Status
                     )
                     VALUES (
                         @indentNo, @complexRef, @date, @currency, @baseValue,
-                        @value, @reimbursement, @harringTransport, @vat, @rat,
-                        @advance, @commission, @total, @psCode, @complex, @item, @supplierId, 1
+                        @value, @reimbursement, @harringTransport, @vat, @nbt,
+                        @advance, @commission, @total, @complex, @item, @supplierId, 1
                     )
                 `;
 
@@ -114,11 +112,10 @@ app.post('/api/indents', async (req, res) => {
                 request.input('reimbursement', sql.Decimal, req.body.reimbursement);
                 request.input('harringTransport', sql.Decimal, req.body.harringTransport);
                 request.input('vat', sql.Decimal, req.body.vat);
-                request.input('rat', sql.Decimal, req.body.rat);
+                request.input('nbt', sql.Decimal, req.body.nbt);
                 request.input('advance', sql.Decimal, req.body.advance);
                 request.input('commission', sql.Decimal, req.body.commission);
                 request.input('total', sql.Decimal, req.body.total);
-                request.input('psCode', sql.VarChar, req.body.psCode);
                 request.input('complex', sql.VarChar, req.body.complex);
                 request.input('item', sql.NVarChar(sql.MAX), req.body.item);
                 request.input('supplierId', sql.Int, req.body.supplierId);
@@ -170,7 +167,7 @@ const createAddIndentsTable = async () => {
                 AddReimbursement DECIMAL(18,2),
                 AddHarringAndTransport DECIMAL(18,2),
                 AddVAT DECIMAL(18,2),
-                AddRAT DECIMAL(18,2),
+                AddNBT DECIMAL(18,2),
                 AddAdvance DECIMAL(18,2),
                 AddCommission DECIMAL(18,2),
                 AddTotal DECIMAL(18,2),
@@ -203,7 +200,7 @@ app.post('/api/addindents', async (req, res) => {
                 .input('addReimbursement', sql.Decimal, req.body.addReimbursement)
                 .input('addHarringTransport', sql.Decimal, req.body.addHarringTransport)
                 .input('addVAT', sql.Decimal, req.body.addVAT)
-                .input('addRAT', sql.Decimal, req.body.addRAT)
+                .input('addNBT', sql.Decimal, req.body.addNBT)
                 .input('addAdvance', sql.Decimal, req.body.addAdvance)
                 .input('addCommission', sql.Decimal, req.body.addCommission)
                 .input('addTotal', sql.Decimal, req.body.addTotal)
@@ -211,12 +208,12 @@ app.post('/api/addindents', async (req, res) => {
                             INSERT INTO AddIndents (
                                 IndentNo, RefTvNo, AddDate, AddCurrency, AddBaseValue,
                                 AddValue, AddReimbursement, AddHarringAndTransport,
-                                AddVAT, AddRAT, AddAdvance, AddCommission, AddTotal
+                                AddVAT, AddNBT, AddAdvance, AddCommission, AddTotal
                             )
                             VALUES (
                                 @indentNo, @refTvNo, @addDate, @addCurrency, @addBaseValue,
                                 @addValue, @addReimbursement, @addHarringTransport,
-                                @addVAT, @addRAT, @addAdvance, @addCommission, @addTotal
+                                @addVAT, @addNBT, @addAdvance, @addCommission, @addTotal
                             )
                          `);
 
@@ -228,7 +225,7 @@ app.post('/api/addindents', async (req, res) => {
                 .input('addReimbursement', sql.Decimal, req.body.addReimbursement)
                 .input('addHarringTransport', sql.Decimal, req.body.addHarringTransport)
                 .input('addVAT', sql.Decimal, req.body.addVAT)
-                .input('addRAT', sql.Decimal, req.body.addRAT)
+                .input('addNBT', sql.Decimal, req.body.addNBT)
                 .input('addAdvance', sql.Decimal, req.body.addAdvance)
                 .input('addCommission', sql.Decimal, req.body.addCommission)
                 .input('addTotal', sql.Decimal, req.body.addTotal)
@@ -239,7 +236,7 @@ app.post('/api/addindents', async (req, res) => {
                                 Reimbursement = Reimbursement + @addReimbursement,
                                 HarringAndTransport = HarringAndTransport + @addHarringTransport,
                                 VAT = VAT + @addVAT,
-                                RAT = RAT + @addRAT,
+                                NBT = NBT + @addNBT,
                                 Advance = Advance + @addAdvance,
                                 Commission = Commission + @addCommission,
                                 Total = Total + @addTotal

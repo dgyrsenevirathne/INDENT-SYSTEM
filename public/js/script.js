@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
     loadSuppliers();
 
     // Add event listeners for calculation
-    const numericInputs = ['value', 'reimbursement', 'harringTransport', 'vat', 'rat', 'advance', 'commission'];
+    const numericInputs = ['value', 'reimbursement', 'harringTransport', 'vat', 'nbt', 'advance', 'commission'];
     numericInputs.forEach(id => {
         document.getElementById(id).addEventListener('input', calculateTotal);
     });
@@ -19,7 +19,7 @@ function calculateTotal() {
         getValue('reimbursement') +
         getValue('harringTransport') +
         getValue('vat') +
-        getValue('rat') +
+        getValue('nbt') +
         getValue('advance') +
         getValue('commission');
 
@@ -56,11 +56,10 @@ async function handleSubmit(e) {
         reimbursement: parseFloat(document.getElementById('reimbursement').value),
         harringTransport: parseFloat(document.getElementById('harringTransport').value),
         vat: parseFloat(document.getElementById('vat').value),
-        rat: parseFloat(document.getElementById('rat').value),
+        nbt: parseFloat(document.getElementById('nbt').value),
         advance: parseFloat(document.getElementById('advance').value),
         commission: parseFloat(document.getElementById('commission').value),
         total: parseFloat(document.getElementById('total').value),
-        psCode: document.getElementById('psCode').value,
         complex: document.getElementById('complex').value,
         item: document.getElementById('item').value,
         supplierId: parseInt(document.getElementById('supplier').value)
