@@ -79,7 +79,7 @@ app.post('/api/indents', async (req, res) => {
                 request.input('reimbursement', sql.Decimal, req.body.reimbursement);
                 request.input('harringTransport', sql.Decimal, req.body.harringTransport);
                 request.input('vat', sql.Decimal, req.body.vat);
-                request.input('nbt', sql.Decimal, req.body.rat);
+                request.input('nbt', sql.Decimal, req.body.nbt);
                 request.input('advance', sql.Decimal, req.body.advance);
                 request.input('commission', sql.Decimal, req.body.commission);
                 request.input('total', sql.Decimal, req.body.total);
