@@ -39,6 +39,10 @@
                     <label for="date">Date:</label>
                     <input type="date" id="date" required>
                 </div>
+            </div>
+
+            <!-- Second Row -->
+            <div class="form-row">
                 <div class="form-group">
                     <label for="currency">Currency:</label>
                     <select id="currency" required>
@@ -47,10 +51,6 @@
                         <option value="EURO">EURO</option>
                     </select>
                 </div>
-            </div>
-
-            <!-- Second Row -->
-            <div class="form-row">
                 <div class="form-group">
                     <label for="baseValue">Base Value:</label>
                     <input type="number" id="baseValue" step="0.01" required>
@@ -63,14 +63,14 @@
                     <label for="reimbursement">Reimbursement:</label>
                     <input type="number" id="reimbursement" step="0.01" required>
                 </div>
-                <div class="form-group">
-                    <label for="harringTransport">Harring and Transport:</label>
-                    <input type="number" id="harringTransport" step="0.01" required>
-                </div>
             </div>
 
             <!-- Third Row -->
             <div class="form-row">
+                <div class="form-group">
+                    <label for="harringTransport">Harring and Transport:</label>
+                    <input type="number" id="harringTransport" step="0.01" required>
+                </div>
                 <div class="form-group">
                     <label for="vat">VAT:</label>
                     <input type="number" id="vat" step="0.01" required>
@@ -83,14 +83,15 @@
                     <label for="advance">Advance:</label>
                     <input type="number" id="advance" step="0.01" required>
                 </div>
-                <div class="form-group">
-                    <label for="commission">Commission:</label>
-                    <input type="number" id="commission" step="0.01" required>
-                </div>
             </div>
 
             <!-- Fourth Row -->
             <div class="form-row">
+                <div class="form-group">
+                    <label for="commission">Commission:</label>
+                    <input type="number" id="commission" step="0.01" required>
+                </div>
+
                 <div class="form-group">
                     <label for="total">Total:</label>
                     <input type="number" id="total" readonly>
