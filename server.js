@@ -56,6 +56,7 @@ app.post('/api/indents', async (req, res) => {
             request.input('complex', sql.VarChar, req.body.complex);
             request.input('item', sql.NVarChar(sql.MAX), req.body.item);
             request.input('supplierId', sql.Int, req.body.supplierId);
+            request.input('indentType', sql.NVarChar(50), req.body.indentType);
 
             // Check existing indent
             const checkQuery = `
@@ -83,6 +84,7 @@ app.post('/api/indents', async (req, res) => {
                         Complex = @complex,
                         Item = @item,
                         SupplierID = @supplierId,
+                        IndentType = @indentType,
                         Status = 1
                     WHERE IndentNo = @indentNo
                 `);
@@ -91,12 +93,12 @@ app.post('/api/indents', async (req, res) => {
                     INSERT INTO Indents (
                         IndentNo, ComplexReference, IndentDate, Currency, BaseValue,
                         Value, Reimbursement, HarringAndTransport, VAT, NBT,
-                        Advance, Commission, Total, Complex, Item, SupplierID, Status
+                        Advance, Commission, Total, Complex, Item, SupplierID, IndentType, Status
                     )
                     VALUES (
                         @indentNo, @complexRef, @date, @currency, @baseValue,
                         @value, @reimbursement, @harringTransport, @vat, @nbt,
-                        @advance, @commission, @total, @complex, @item, @supplierId, 1
+                        @advance, @commission, @total, @complex, @item, @supplierId, @indentType, 1
                     )
                 `);
             }

@@ -36,8 +36,12 @@
                     <input type="text" id="refTvNo" pattern="[\d.]+/TVB/\d{2}/\d{4}">
                 </div>
                 <div class="form-group">
-                    <label for="date">Date:</label>
-                    <input type="date" id="date" required>
+                    <label for="indentType">Indent Type:</label>
+                    <select id="indentType" required>
+                        <option value="Goods">Goods</option>
+                        <option value="Works">Works</option>
+                        <option value="Service">Service</option>
+                    </select>
                 </div>
             </div>
 
@@ -52,6 +56,10 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label for="date">Date:</label>
+                    <input type="date" id="date" required>
+                </div>
+                <div class="form-group">
                     <label for="baseValue">Base Value:</label>
                     <input type="number" id="baseValue" step="0.01" required>
                 </div>
@@ -59,14 +67,14 @@
                     <label for="value">VALUE:</label>
                     <input type="number" id="value" step="0.01" required>
                 </div>
-                <div class="form-group">
-                    <label for="reimbursement">Reimbursement:</label>
-                    <input type="number" id="reimbursement" step="0.01" required>
-                </div>
             </div>
 
             <!-- Third Row -->
             <div class="form-row">
+                <div class="form-group">
+                    <label for="reimbursement">Reimbursement:</label>
+                    <input type="number" id="reimbursement" step="0.01" required>
+                </div>
                 <div class="form-group">
                     <label for="harringTransport">Harring and Transport:</label>
                     <input type="number" id="harringTransport" step="0.01" required>
@@ -79,14 +87,14 @@
                     <label for="nbt">NBT:</label>
                     <input type="number" id="nbt" step="0.01" required>
                 </div>
-                <div class="form-group">
-                    <label for="advance">Advance:</label>
-                    <input type="number" id="advance" step="0.01" required>
-                </div>
             </div>
 
             <!-- Fourth Row -->
             <div class="form-row">
+                <div class="form-group">
+                    <label for="advance">Advance:</label>
+                    <input type="number" id="advance" step="0.01" required>
+                </div>
                 <div class="form-group">
                     <label for="commission">Commission:</label>
                     <input type="number" id="commission" step="0.01" required>

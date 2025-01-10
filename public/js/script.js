@@ -63,7 +63,8 @@ async function handleSubmit(e) {
         total: parseFloat(document.getElementById('total').value),
         complex: document.getElementById('complex').value,
         item: document.getElementById('item').value,
-        supplierId: parseInt(document.getElementById('supplier').value)
+        supplierId: parseInt(document.getElementById('supplier').value),
+        indentType: document.getElementById('indentType').value
     };
 
     try {
