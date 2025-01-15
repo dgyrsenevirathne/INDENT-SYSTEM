@@ -44,15 +44,15 @@ app.post('/api/indents', async (req, res) => {
             request.input('complexRef', sql.VarChar, req.body.complexRef);
             request.input('date', sql.Date, new Date(req.body.date));
             request.input('currency', sql.VarChar, req.body.currency);
-            request.input('baseValue', sql.Decimal, req.body.baseValue);
-            request.input('value', sql.Decimal, req.body.value);
-            request.input('reimbursement', sql.Decimal, req.body.reimbursement);
-            request.input('harringTransport', sql.Decimal, req.body.harringTransport);
-            request.input('vat', sql.Decimal, req.body.vat);
-            request.input('nbt', sql.Decimal, req.body.nbt);
-            request.input('advance', sql.Decimal, req.body.advance);
-            request.input('commission', sql.Decimal, req.body.commission);
-            request.input('total', sql.Decimal, req.body.total);
+            request.input('baseValue', sql.Decimal(18, 2), req.body.baseValue);
+            request.input('value', sql.Decimal(18, 2), req.body.value);
+            request.input('reimbursement', sql.Decimal(18, 2), req.body.reimbursement);
+            request.input('harringTransport', sql.Decimal(18, 2), req.body.harringTransport);
+            request.input('vat', sql.Decimal(18, 2), req.body.vat);
+            request.input('nbt', sql.Decimal(18, 2), req.body.nbt);
+            request.input('advance', sql.Decimal(18, 2), req.body.advance);
+            request.input('commission', sql.Decimal(18, 2), req.body.commission);
+            request.input('total', sql.Decimal(18, 2), req.body.total);
             request.input('complex', sql.VarChar, req.body.complex);
             request.input('item', sql.NVarChar(sql.MAX), req.body.item);
             request.input('supplierId', sql.Int, req.body.supplierId);
@@ -191,15 +191,15 @@ app.post('/api/addindents', async (req, res) => {
                 .input('refTvNo', sql.VarChar, req.body.refTvNo)
                 .input('addDate', sql.Date, new Date(req.body.addDate))
                 .input('addCurrency', sql.VarChar, req.body.addCurrency)
-                .input('addBaseValue', sql.Decimal, req.body.addBaseValue)
-                .input('addValue', sql.Decimal, req.body.addValue)
-                .input('addReimbursement', sql.Decimal, req.body.addReimbursement)
-                .input('addHarringTransport', sql.Decimal, req.body.addHarringTransport)
-                .input('addVAT', sql.Decimal, req.body.addVAT)
-                .input('addNBT', sql.Decimal, req.body.addNBT)
-                .input('addAdvance', sql.Decimal, req.body.addAdvance)
-                .input('addCommission', sql.Decimal, req.body.addCommission)
-                .input('addTotal', sql.Decimal, req.body.addTotal)
+                .input('addBaseValue', sql.Decimal(18, 2), req.body.addBaseValue)
+                .input('addValue', sql.Decimal(18, 2), req.body.addValue)
+                .input('addReimbursement', sql.Decimal(18, 2), req.body.addReimbursement)
+                .input('addHarringTransport', sql.Decimal(18, 2), req.body.addHarringTransport)
+                .input('addVAT', sql.Decimal(18, 2), req.body.addVAT)
+                .input('addNBT', sql.Decimal(18, 2), req.body.addNBT)
+                .input('addAdvance', sql.Decimal(18, 2), req.body.addAdvance)
+                .input('addCommission', sql.Decimal(18, 2), req.body.addCommission)
+                .input('addTotal', sql.Decimal(18, 2), req.body.addTotal)
                 .query(`
                             INSERT INTO AddIndents (
                                 IndentNo, RefTvNo, AddDate, AddCurrency, AddBaseValue,
@@ -216,15 +216,15 @@ app.post('/api/addindents', async (req, res) => {
             // 2. Update Indents table
             const request2 = new sql.Request(transaction);
             await request2.input('indentNo', sql.VarChar, req.body.indentNo)
-                .input('addBaseValue', sql.Decimal, req.body.addBaseValue)
-                .input('addValue', sql.Decimal, req.body.addValue)
-                .input('addReimbursement', sql.Decimal, req.body.addReimbursement)
-                .input('addHarringTransport', sql.Decimal, req.body.addHarringTransport)
-                .input('addVAT', sql.Decimal, req.body.addVAT)
-                .input('addNBT', sql.Decimal, req.body.addNBT)
-                .input('addAdvance', sql.Decimal, req.body.addAdvance)
-                .input('addCommission', sql.Decimal, req.body.addCommission)
-                .input('addTotal', sql.Decimal, req.body.addTotal)
+                .input('addBaseValue', sql.Decimal(18, 2), req.body.addBaseValue)
+                .input('addValue', sql.Decimal(18, 2), req.body.addValue)
+                .input('addReimbursement', sql.Decimal(18, 2), req.body.addReimbursement)
+                .input('addHarringTransport', sql.Decimal(18, 2), req.body.addHarringTransport)
+                .input('addVAT', sql.Decimal(18, 2), req.body.addVAT)
+                .input('addNBT', sql.Decimal(18, 2), req.body.addNBT)
+                .input('addAdvance', sql.Decimal(18, 2), req.body.addAdvance)
+                .input('addCommission', sql.Decimal(18, 2), req.body.addCommission)
+                .input('addTotal', sql.Decimal(18, 2), req.body.addTotal)
                 .query(`
                             UPDATE Indents
                             SET BaseValue = BaseValue + @addBaseValue,
