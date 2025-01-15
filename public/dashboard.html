@@ -7,6 +7,7 @@
     <title>Indent Management Dashboard</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
 </head>
 
 <body>
@@ -24,6 +25,7 @@
         <div class="filter-container">
             <input type="text" id="indentNoFilter" placeholder="Filter by Indent No">
             <button id="filterButton">Filter</button>
+            <button id="exportToExcel" class="export-btn">Export to Excel</button>
         </div>
         <table id="indentsTable">
             <thead>
@@ -205,6 +207,55 @@
                 filterButton.textContent = 'Filter';
                 loadIndents();
             }
+        });
+
+        document.getElementById('exportToExcel').addEventListener('click', function () {
+            const table = document.getElementById('indentsTable');
+            const rows = table.rows;
+
+            // Create a new workbook
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Indents');
+
+            // Add the header row
+            const headerRow = [];
+            for (let i = 0; i < rows[0].cells.length - 1; i++) {
+                headerRow.push(rows[0].cells[i].textContent);
+            }
+
+            headerRow.push('Complex Reference');
+            headerRow.push('Item');
+            headerRow.push('Supplier');
+            headerRow.push('Indent Type');
+            worksheet.addRow(headerRow);
+
+            // Add the data rows
+            for (let i = 1; i < rows.length; i++) {
+                const row = [];
+                for (let j = 0; j < rows[i].cells.length - 1; j++) {
+                    row.push(rows[i].cells[j].textContent);
+                }
+                // Get the details data from the modal
+                const detailsButton = rows[i].cells[rows[i].cells.length - 1].querySelector('.details-btn');
+                const complexRef = detailsButton.dataset.complexRef;
+                const item = detailsButton.dataset.item;
+                const supplier = detailsButton.dataset.supplier;
+                const indentType = detailsButton.dataset.indentType;
+                row.push(complexRef);
+                row.push(item);
+                row.push(supplier);
+                row.push(indentType);
+                worksheet.addRow(row);
+            }
+
+            // Save the workbook to a file
+            workbook.xlsx.writeBuffer().then(function (buffer) {
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'indents.xlsx';
+                link.click();
+            });
         });
 
     </script>
