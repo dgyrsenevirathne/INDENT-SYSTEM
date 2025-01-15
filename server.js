@@ -290,6 +290,24 @@ app.put('/api/indents/:indentNo/status', async (req, res) => {
     }
 });
 
+// Check if indent number already exists
+app.get('/api/indents/check', async (req, res) => {
+    const indentNo = req.query.indentNo;
+
+    try {
+        await sql.connect(sqlConfig);
+        const result = await sql.query`SELECT IndentNo FROM Indents WHERE IndentNo = ${indentNo}`;
+
+        if (result.recordset.length > 0) {
+            res.json({ exists: true });
+        } else {
+            res.json({ exists: false });
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

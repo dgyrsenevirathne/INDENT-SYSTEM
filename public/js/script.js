@@ -46,6 +46,23 @@ async function loadSuppliers() {
 async function handleSubmit(e) {
     e.preventDefault();
 
+    const indentNo = document.getElementById('indentNo').value;
+
+    // First, check if the indent number already exists
+    try {
+        const checkResponse = await fetch(`/api/indents/check?indentNo=${encodeURIComponent(indentNo)}`);
+        const checkResult = await checkResponse.json();
+
+        if (checkResult.exists) {
+            alert('Indent number already exists. Please use a different indent number.');
+            return;
+        }
+    } catch (error) {
+        console.error('Error checking indent number:', error);
+        alert('Error checking indent number: ' + error.message);
+        return;
+    }
+
     const formData = {
         indentNo: document.getElementById('indentNo').value,
         refTvNo: document.getElementById('refTvNo').value,
