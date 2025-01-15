@@ -21,6 +21,10 @@
     </div>
 
     <div class="container">
+        <div class="filter-container">
+            <input type="text" id="indentNoFilter" placeholder="Filter by Indent No">
+            <button id="filterButton">Filter</button>
+        </div>
         <table id="indentsTable">
             <thead>
                 <tr>
@@ -62,8 +66,22 @@
                 const response = await fetch('/api/indents');
                 const indents = await response.json();
                 const tbody = document.querySelector('#indentsTable tbody');
+                const filterInput = document.getElementById('indentNoFilter');
+                const filterButton = document.getElementById('filterButton');
 
-                tbody.innerHTML = indents.map(indent => `
+                // Filter input
+                const filterValue = filterInput.value.trim();
+
+                let filteredIndents = indents;
+
+                if (filterValue) {
+                    filteredIndents = indents.filter(indent => indent.IndentNo.includes(filterValue));
+                    filterButton.textContent = 'Clear';
+                } else {
+                    filterButton.textContent = 'Filter';
+                }
+
+                tbody.innerHTML = filteredIndents.map(indent => `
                     <tr>
                         <td>${indent.IndentNo}</td>
                         <td>${new Date(indent.IndentDate).toLocaleDateString()}</td>
@@ -165,15 +183,30 @@
                     }
 
                     alert(data.message || 'Indent deleted successfully');
-                    loadIndents(); // Reload the table
+                    loadIndents();
                 } catch (error) {
-                    console.error('Delete error:', error); // Debug log
+                    console.error('Delete error:', error);
                     alert('Error deleting indent: ' + error.message);
                 }
             }
         }
 
+        document.getElementById('indentNoFilter').addEventListener('input', loadIndents);
         document.addEventListener('DOMContentLoaded', loadIndents);
+
+        document.getElementById('filterButton').addEventListener('click', function () {
+            const filterInput = document.getElementById('indentNoFilter');
+            const filterButton = document.getElementById('filterButton');
+
+            if (filterButton.textContent === 'Filter') {
+                loadIndents();
+            } else {
+                filterInput.value = '';
+                filterButton.textContent = 'Filter';
+                loadIndents();
+            }
+        });
+
     </script>
 </body>
 

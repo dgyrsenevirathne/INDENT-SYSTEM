@@ -132,3 +132,52 @@ tr:nth-child(even) {
 .delete-btn:hover {
     background-color: #e01a1a;
 }
+
+/* Filter Container */
+.filter-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+/* Filter Input */
+#indentNoFilter {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 200px;
+    transition: border-color 0.3s ease;
+}
+
+#indentNoFilter:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.2);
+}
+
+/* Filter Button */
+#filterButton {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+#filterButton:hover {
+    background-color: #45a049;
+}
+
+/* Clear Button Style */
+#filterButton[data-state="clear"] {
+    background-color: #f44336;
+}
+
+#filterButton[data-state="clear"]:hover {
+    background-color: #e53935;
+}
