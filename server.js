@@ -262,7 +262,7 @@ app.put('/api/indents/:indentNo/status', async (req, res) => {
         // Modified query to handle potential spacing differences
         const query = `
             UPDATE Indents
-            SET Status = 0
+            SET Status = 0, DeletedDate = GETDATE()
             WHERE REPLACE(IndentNo, ' ', '') = @indentNo
         `;
 
