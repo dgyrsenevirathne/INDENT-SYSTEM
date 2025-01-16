@@ -308,6 +308,17 @@ app.get('/api/indents/check', async (req, res) => {
     }
 });
 
+app.post('/api/log-indent-deletion', async (req, res) => {
+    try {
+        const indentNo = req.body.indentNo;
+        console.log(`Indent ${indentNo} deleted by user`);
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Error logging indent deletion:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

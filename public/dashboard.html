@@ -184,6 +184,16 @@
                         throw new Error(data.message || 'Failed to delete indent');
                     }
 
+                    // Log the deletion
+                    console.log(`Indent ${indentNo} deleted by user`);
+                    fetch('/api/log-indent-deletion', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ indentNo: indentNo })
+                    });
+
                     alert(data.message || 'Indent deleted successfully');
                     loadIndents();
                 } catch (error) {
