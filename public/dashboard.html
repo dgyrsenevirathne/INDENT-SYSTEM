@@ -107,6 +107,9 @@
                         <button class="add-btn" onclick="addValues('${indent.IndentNo}')">
                             Add
                         </button>
+                         <button class="edit-btn" onclick="editIndent('${indent.IndentNo}')">
+                            Edit
+                        </button>
                          <button class="delete-btn" onclick="deleteIndent('${indent.IndentNo}')">
                             Delete
                         </button>
@@ -161,6 +164,10 @@
             }) : '0.00';
         }
 
+        function editIndent(indentNo) {
+            window.location.href = `/editform.html?indentNo=${indentNo}`;
+        }
+
         async function deleteIndent(indentNo) {
             if (confirm('Are you sure you want to delete this indent?')) {
                 try {
@@ -184,7 +191,6 @@
                         throw new Error(data.message || 'Failed to delete indent');
                     }
 
-                    // Log the deletion
                     console.log(`Indent ${indentNo} deleted by user`);
                     fetch('/api/log-indent-deletion', {
                         method: 'POST',
@@ -227,7 +233,6 @@
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('Indents');
 
-            // Add the header row
             const headerRow = [];
             for (let i = 0; i < rows[0].cells.length - 1; i++) {
                 headerRow.push(rows[0].cells[i].textContent);

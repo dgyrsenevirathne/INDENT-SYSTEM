@@ -7,8 +7,8 @@ app.use(express.json());
 
 // Redirect root URL to dashboard.html
 app.get('/', (req, res) => {
-    console.log('Redirecting to dashboard.html'); // Debug log
-    res.redirect('/dashboard.html'); // Redirect to dashboard.html
+    console.log('Redirecting to dashboard.html');
+    res.redirect('/dashboard.html');
 });
 
 app.use(express.static('public'));
@@ -259,7 +259,6 @@ app.put('/api/indents/:indentNo/status', async (req, res) => {
         // Clean the indent number by removing all spaces
         const indentNo = decodeURIComponent(req.params.indentNo).replace(/\s+/g, '');
 
-        // Modified query to handle potential spacing differences
         const query = `
             UPDATE Indents
             SET Status = 0, DeletedDate = GETDATE()
@@ -268,9 +267,8 @@ app.put('/api/indents/:indentNo/status', async (req, res) => {
 
         request.input('indentNo', sql.VarChar, indentNo);
 
-        console.log('Attempting to delete indent:', indentNo); // Debug log
+        console.log('Attempting to delete indent:', indentNo);
 
-        // First, let's verify if the record exists
         const checkQuery = `SELECT IndentNo FROM Indents WHERE REPLACE(IndentNo, ' ', '') = @indentNo`;
         const checkResult = await request.query(checkQuery);
 
@@ -319,10 +317,72 @@ app.post('/api/log-indent-deletion', async (req, res) => {
     }
 });
 
+// Get indent by indent number
+app.get('/api/indents/:indentNo', async (req, res) => {
+    try {
+        await sql.connect(sqlConfig);
+        const request = new sql.Request();
+        request.input('indentNo', sql.VarChar, req.params.indentNo);
+        const result = await request.query('SELECT * FROM Indents WHERE IndentNo = @indentNo');
+        res.json(result.recordset[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Update indent
+app.put('/api/indents/:indentNo', async (req, res) => {
+    try {
+        await sql.connect(sqlConfig);
+        const request = new sql.Request();
+        const indentNo = decodeURIComponent(req.params.indentNo);
+        request.input('indentNo', sql.VarChar, indentNo);
+        request.input('complexRef', sql.VarChar, req.body.complexRef);
+        request.input('date', sql.Date, new Date(req.body.date));
+        request.input('currency', sql.VarChar, req.body.currency);
+        request.input('baseValue', sql.Decimal(18, 2), req.body.baseValue);
+        request.input('value', sql.Decimal(18, 2), req.body.value);
+        request.input('reimbursement', sql.Decimal(18, 2), req.body.reimbursement);
+        request.input('harringTransport', sql.Decimal(18, 2), req.body.harringTransport);
+        request.input('vat', sql.Decimal(18, 2), req.body.vat);
+        request.input('nbt', sql.Decimal(18, 2), req.body.nbt);
+        request.input('advance', sql.Decimal(18, 2), req.body.advance);
+        request.input('commission', sql.Decimal(18, 2), req.body.commission);
+        request.input('total', sql.Decimal(18, 2), req.body.total);
+        request.input('complex', sql.VarChar, req.body.complex);
+        request.input('item', sql.NVarChar(sql.MAX), req.body.item);
+        request.input('supplierId', sql.Int, req.body.supplierId);
+        request.input('indentType', sql.NVarChar(50), req.body.indentType);
+        await request.query(`
+            UPDATE Indents SET
+                ComplexReference = @complexRef,
+                IndentDate = @date,
+                Currency = @currency,
+                BaseValue = @baseValue,
+                Value = @value,
+                Reimbursement = @reimbursement,
+                HarringAndTransport = @harringTransport,
+                VAT = @vat,
+                NBT = @nbt,
+                Advance = @advance,
+                Commission = @commission,
+                Total = @total,
+                Complex = @complex,
+                Item = @item,
+                SupplierID = @supplierId,
+                IndentType = @indentType
+            WHERE IndentNo = @indentNo
+        `);
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Error updating indent:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
 
-// Call this when server starts
 createAddIndentsTable();
