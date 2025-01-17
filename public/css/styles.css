@@ -250,7 +250,7 @@ button[type="submit"]:hover {
 /* Submit Button */
 .submit-btn {
     padding: 10px 20px;
-    background-color: #4CAF50;
+    background-color: #2196F3;
     color: white;
     border: none;
     border-radius: 4px;
@@ -260,5 +260,30 @@ button[type="submit"]:hover {
 }
 
 .submit-btn:hover {
-    background-color: #45a049;
+    background-color: #1A75FF;
+}
+
+.add-supplier-btn {
+    padding: 8px 16px;
+    background-color: #1ABC9C;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.add-supplier-btn:hover {
+    background-color: #149B7F;
+}
+
+.add-supplier-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.add-supplier-btn:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.2);
 }
