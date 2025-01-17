@@ -122,6 +122,20 @@
                     <select id="supplier" required>
                         <!-- Will be populated from database -->
                     </select>
+                    <button id="addSupplierBtn" class="add-supplier-btn">Add Supplier</button>
+                </div>
+            </div>
+
+            <!-- Add Supplier Modal -->
+            <div id="addSupplierModal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2>Add Supplier</h2>
+                    <div class="modal-body">
+                        <label for="newSupplierName">Supplier Name:</label>
+                        <input type="text" id="newSupplierName" required>
+                        <button id="addSupplierSubmit" class="submit-btn">Add Supplier</button>
+                    </div>
                 </div>
             </div>
 

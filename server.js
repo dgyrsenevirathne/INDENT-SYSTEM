@@ -427,6 +427,32 @@ app.put('/api/indents/:indentNo', async (req, res) => {
     }
 });
 
+// Add new supplier endpoint
+app.post('/api/suppliers', async (req, res) => {
+    try {
+        await sql.connect(sqlConfig);
+        const request = new sql.Request();
+        request.input('SupplierName', sql.NVarChar(sql.MAX), req.body.SupplierName);
+
+        // Modify the query to return the inserted record
+        const result = await request.query(`
+            INSERT INTO Suppliers (SupplierName)
+            OUTPUT INSERTED.SupplierID
+            VALUES (@SupplierName)
+        `);
+
+        // Check if the result contains the inserted record
+        if (result.recordset && result.recordset.length > 0) {
+            res.json({ success: true, SupplierID: result.recordset[0].SupplierID });
+        } else {
+            throw new Error('Failed to retrieve the inserted SupplierID');
+        }
+    } catch (err) {
+        console.error('Error adding supplier:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

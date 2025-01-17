@@ -26,12 +26,52 @@ function calculateTotal() {
     document.getElementById('total').value = total.toFixed(2);
 }
 
+// Add event listener to Add Supplier button
+document.getElementById('addSupplierBtn').addEventListener('click', function () {
+    document.getElementById('addSupplierModal').style.display = 'flex';
+});
+
+// Add event listener to close button
+document.querySelector('.close').onclick = function () {
+    document.getElementById('addSupplierModal').style.display = 'none';
+}
+
+// Add event listener to Add Supplier submit button
+document.getElementById('addSupplierSubmit').addEventListener('click', async function () {
+    const newSupplierName = document.getElementById('newSupplierName').value;
+    if (newSupplierName) {
+        try {
+            const response = await fetch('/api/suppliers', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ SupplierName: newSupplierName })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                console.log('Supplier added successfully:', data);
+                alert('Supplier added successfully!');
+                // Refresh supplier dropdown
+                loadSuppliers();
+                document.getElementById('addSupplierModal').style.display = 'none';
+            } else {
+                console.error('Error adding supplier:', data.error);
+                alert('Error adding supplier: ' + data.error);
+            }
+        } catch (error) {
+            console.error('Error adding supplier:', error);
+            alert('Error adding supplier: ' + error.message);
+        }
+    }
+});
+
 async function loadSuppliers() {
     try {
         const response = await fetch('/api/suppliers');
         const suppliers = await response.json();
         const select = document.getElementById('supplier');
-
+        select.innerHTML = '';
         suppliers.forEach(supplier => {
             const option = document.createElement('option');
             option.value = supplier.SupplierID;
