@@ -335,8 +335,28 @@ app.put('/api/indents/:indentNo', async (req, res) => {
     try {
         await sql.connect(sqlConfig);
         const request = new sql.Request();
-        const indentNo = decodeURIComponent(req.params.indentNo);
-        request.input('indentNo', sql.VarChar, indentNo);
+        const oldIndentNo = decodeURIComponent(req.params.indentNo);
+        const newIndentNo = req.body.indentNo;
+
+        // Add debug logging
+        console.log('Updating indent:', {
+            oldIndentNo,
+            newIndentNo,
+            requestBody: req.body
+        });
+
+        // Verify indent exists before update
+        const checkResult = await request.query`
+         SELECT COUNT(*) as count 
+         FROM Indents 
+         WHERE IndentNo = ${oldIndentNo}`;
+
+        if (checkResult.recordset[0].count === 0) {
+            return res.status(404).json({ error: 'Indent not found' });
+        }
+
+        request.input('oldIndentNo', sql.VarChar, oldIndentNo);
+        request.input('newIndentNo', sql.VarChar, newIndentNo);
         request.input('complexRef', sql.VarChar, req.body.complexRef);
         request.input('date', sql.Date, new Date(req.body.date));
         request.input('currency', sql.VarChar, req.body.currency);
@@ -353,8 +373,10 @@ app.put('/api/indents/:indentNo', async (req, res) => {
         request.input('item', sql.NVarChar(sql.MAX), req.body.item);
         request.input('supplierId', sql.Int, req.body.supplierId);
         request.input('indentType', sql.NVarChar(50), req.body.indentType);
-        await request.query(`
-            UPDATE Indents SET
+
+        const updateResult = await request.query(`
+            UPDATE Indents 
+            SET IndentNo = @newIndentNo,
                 ComplexReference = @complexRef,
                 IndentDate = @date,
                 Currency = @currency,
@@ -371,12 +393,37 @@ app.put('/api/indents/:indentNo', async (req, res) => {
                 Item = @item,
                 SupplierID = @supplierId,
                 IndentType = @indentType
-            WHERE IndentNo = @indentNo
+            WHERE IndentNo = @oldIndentNo
         `);
-        res.json({ success: true });
+
+        // Update AddIndents table
+        if (oldIndentNo !== newIndentNo) {
+            const transaction = new sql.Transaction();
+            await transaction.begin();
+            const updateAddIndentsRequest = new sql.Request(transaction);
+            updateAddIndentsRequest.input('newIndentNo', sql.VarChar, newIndentNo);
+            updateAddIndentsRequest.input('oldIndentNo', sql.VarChar, oldIndentNo);
+            await updateAddIndentsRequest.query(`
+        UPDATE AddIndents
+        SET IndentNo = @newIndentNo
+        WHERE IndentNo = @oldIndentNo
+    `);
+            await transaction.commit();
+        }
+
+        // Return the updated indent data
+        const updatedIndent = await request.query(`SELECT * FROM Indents WHERE IndentNo = @newIndentNo`, {
+            newIndentNo: newIndentNo
+        });
+
+        res.json({
+            success: true,
+            message: oldIndentNo !== newIndentNo ? 'Indent updated successfully' : 'Indent updated successfully, but Indent No remains the same',
+            updatedRecord: updatedIndent.recordset[0]
+        });
     } catch (err) {
         console.error('Error updating indent:', err);
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'An error occurred while updating the indent' });
     }
 });
 

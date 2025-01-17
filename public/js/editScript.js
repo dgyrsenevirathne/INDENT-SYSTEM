@@ -78,32 +78,34 @@ async function handleEditSubmit(e) {
     e.preventDefault();
 
     try {
-        // Calculate total before submitting
-        calculateTotal();
+        const urlParams = new URLSearchParams(window.location.search);
+        const originalIndentNo = urlParams.get('indentNo');
 
+        if (!originalIndentNo) {
+            throw new Error('No indent number provided');
+        }
+
+        calculateTotal();
         const formData = getFormData();
 
-        // Validate required fields
         if (!validateFormData(formData)) {
             alert('Please fill in all required fields with valid values');
             return;
         }
 
-        const response = await updateIndent(formData);
+        const result = await updateIndent(formData);
 
-        if (response.ok) {
+        if (result.success) {
             alert('Indent updated successfully!');
             window.location.href = '/dashboard.html';
         } else {
-            const error = await getError(response);
-            throw new Error(error || 'Failed to update indent');
+            throw new Error(result.error || 'Failed to update indent');
         }
     } catch (error) {
         console.error('Error updating indent:', error);
         alert('Error updating indent: ' + error.message);
     }
 }
-
 function getFormData() {
     return {
         indentNo: document.getElementById('indentNo').value,
@@ -128,21 +130,31 @@ function getFormData() {
 
 async function updateIndent(formData) {
     try {
-        const encodedIndentNo = encodeURIComponent(formData.indentNo);
-        const response = await fetch(`/api/indents/${encodedIndentNo}`, {
+        const urlParams = new URLSearchParams(window.location.search);
+        const originalIndentNo = urlParams.get('indentNo');
+
+        if (!originalIndentNo) {
+            throw new Error('Original indent number not found');
+        }
+
+        const response = await fetch(`/api/indents/${encodeURIComponent(originalIndentNo)}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(formData)
+            body: JSON.stringify({
+                ...formData,
+                indentNo: formData.indentNo.trim()
+            })
         });
 
+        const data = await response.json();
+
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Failed to update indent');
+            throw new Error(data.error || 'Failed to update indent');
         }
 
-        return response;
+        return data;
     } catch (error) {
         console.error('Error in updateIndent:', error);
         throw error;
