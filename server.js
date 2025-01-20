@@ -484,7 +484,6 @@ const createGrnTable = async () => {
                 REFERENCES Indents(IndentNo)
             )
         `);
-        console.log('GRN table created successfully');
     } catch (err) {
         console.error('Error creating GRN table:', err);
     }
