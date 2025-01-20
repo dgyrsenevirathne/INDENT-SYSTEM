@@ -7,6 +7,7 @@
     <title>Indent Management Dashboard</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/grnstyle.css">
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
 </head>
 
@@ -62,6 +63,29 @@
             </div>
         </div>
     </div>
+    <!-- Add this modal HTML before the closing body tag -->
+    <div id="grnModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeGrnModal()">&times;</span>
+            <h2>Add GRN Details</h2>
+            <form id="grnForm">
+                <input type="hidden" id="grnIndentNo">
+                <div class="form-group">
+                    <label for="grnDate">Date:</label>
+                    <input type="date" id="grnDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="grnNo">GRN No:</label>
+                    <input type="text" id="grnNo" required>
+                </div>
+                <div class="form-group">
+                    <label for="grnAmount">Amount:</label>
+                    <input type="number" id="grnAmount" step="0.01" required>
+                </div>
+                <button type="submit" class="submit-btn">Submit GRN</button>
+            </form>
+        </div>
+    </div>
     <script>
         async function loadIndents() {
             try {
@@ -112,6 +136,9 @@
                         </button>
                          <button class="delete-btn" onclick="deleteIndent('${indent.IndentNo}')">
                             Delete
+                        </button>
+                         <button class="grn-btn" onclick="showGrnModal('${indent.IndentNo}')">
+                            Add GRN
                         </button>
                     </td>
                     </tr>
@@ -271,6 +298,49 @@
                 link.download = 'indents.xlsx';
                 link.click();
             });
+        });
+
+        // Add these functions to your existing script
+        function showGrnModal(indentNo) {
+            document.getElementById('grnModal').style.display = 'block';
+            document.getElementById('grnIndentNo').value = indentNo;
+            document.getElementById('grnDate').value = new Date().toISOString().split('T')[0];
+        }
+
+        function closeGrnModal() {
+            document.getElementById('grnModal').style.display = 'none';
+            document.getElementById('grnForm').reset();
+        }
+
+        document.getElementById('grnForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const formData = {
+                indentNo: document.getElementById('grnIndentNo').value,
+                grnDate: document.getElementById('grnDate').value,
+                grnNo: document.getElementById('grnNo').value,
+                grnAmount: parseFloat(document.getElementById('grnAmount').value)
+            };
+
+            try {
+                const response = await fetch('/api/grn', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert('GRN added successfully!');
+                    closeGrnModal();
+                } else {
+                    alert('Error adding GRN: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
         });
 
     </script>

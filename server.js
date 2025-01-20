@@ -453,9 +453,98 @@ app.post('/api/suppliers', async (req, res) => {
     }
 });
 
+// Update the createGrnTable function
+const createGrnTable = async () => {
+    try {
+        await sql.connect(sqlConfig);
+
+        // First ensure IndentNo is unique in Indents table
+        await sql.query(`
+            IF NOT EXISTS (
+                SELECT * FROM sys.indexes 
+                WHERE name='UQ_Indents_IndentNo' AND object_id = OBJECT_ID('Indents')
+            )
+            BEGIN
+                ALTER TABLE Indents
+                ADD CONSTRAINT UQ_Indents_IndentNo UNIQUE (IndentNo)
+            END
+        `);
+
+        // Then create GRN table with foreign key
+        await sql.query(`
+            IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='GRN' AND xtype='U')
+            CREATE TABLE GRN (
+                GrnID INT PRIMARY KEY IDENTITY(1,1),
+                IndentNo VARCHAR(50),
+                GrnNo VARCHAR(50) UNIQUE,
+                GrnDate DATE,
+                GrnAmount DECIMAL(18,2),
+                CreatedAt DATETIME DEFAULT GETDATE(),
+                CONSTRAINT FK_GRN_Indents FOREIGN KEY (IndentNo) 
+                REFERENCES Indents(IndentNo)
+            )
+        `);
+        console.log('GRN table created successfully');
+    } catch (err) {
+        console.error('Error creating GRN table:', err);
+    }
+};
+
+// Add this API endpoint
+app.post('/api/grn', async (req, res) => {
+    try {
+        await sql.connect(sqlConfig);
+        const request = new sql.Request();
+
+        request.input('indentNo', sql.VarChar, req.body.indentNo);
+        request.input('grnNo', sql.VarChar, req.body.grnNo);
+        request.input('grnDate', sql.Date, new Date(req.body.grnDate));
+        request.input('grnAmount', sql.Decimal(18, 2), req.body.grnAmount);
+
+        // Check if GRN number already exists
+        const checkResult = await request.query`
+            SELECT GrnNo FROM GRN WHERE GrnNo = ${req.body.grnNo}
+        `;
+
+        if (checkResult.recordset.length > 0) {
+            return res.status(400).json({ error: 'GRN number already exists' });
+        }
+
+        await request.query(`
+            INSERT INTO GRN (IndentNo, GrnNo, GrnDate, GrnAmount)
+            VALUES (@indentNo, @grnNo, @grnDate, @grnAmount)
+        `);
+
+        res.json({ success: true, message: 'GRN added successfully' });
+    } catch (err) {
+        console.error('Error adding GRN:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Add this API endpoint to get GRN details for an indent
+app.get('/api/grn/:indentNo', async (req, res) => {
+    try {
+        await sql.connect(sqlConfig);
+        const request = new sql.Request();
+        request.input('indentNo', sql.VarChar, req.params.indentNo);
+
+        const result = await request.query(`
+            SELECT * FROM GRN 
+            WHERE IndentNo = @indentNo 
+            ORDER BY GrnDate DESC
+        `);
+
+        res.json(result.recordset);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
 
 createAddIndentsTable();
+createGrnTable();
