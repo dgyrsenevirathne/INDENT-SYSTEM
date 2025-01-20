@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/grnstyle.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
 </head>
 
@@ -63,7 +64,6 @@
             </div>
         </div>
     </div>
-    <!-- Add this modal HTML before the closing body tag -->
     <div id="grnModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeGrnModal()">&times;</span>
@@ -126,16 +126,16 @@
                          data-item="${indent.Item}" 
                          data-supplier="${indent.SupplierName}"
                          data-indent-type="${indent.IndentType}">
-                         Details
+                         <i class="fas fa-info-circle"></i>
                          </button>
                         <button class="add-btn" onclick="addValues('${indent.IndentNo}')">
-                            Add
+                            <i class="fas fa-plus"></i>
                         </button>
                          <button class="edit-btn" onclick="editIndent('${indent.IndentNo}')">
-                            Edit
+                            <i class="fas fa-edit"></i>
                         </button>
                          <button class="delete-btn" onclick="deleteIndent('${indent.IndentNo}')">
-                            Delete
+                            <i class="fas fa-trash"></i>
                         </button>
                          <button class="grn-btn" onclick="showGrnModal('${indent.IndentNo}')">
                             Add GRN
