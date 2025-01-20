@@ -1,5 +1,5 @@
 .grn-btn {
-    background-color: #4CAF50;
+    background-color: purple;
     color: white;
     border: none;
     padding: 5px 10px;
@@ -9,7 +9,7 @@
 }
 
 .grn-btn:hover {
-    background-color: #45a049;
+    background-color: rgb(100, 43, 100);
 }
 
 .form-group {
@@ -26,17 +26,4 @@
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
-}
-
-.submit-btn {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.submit-btn:hover {
-    background-color: #45a049;
 }
