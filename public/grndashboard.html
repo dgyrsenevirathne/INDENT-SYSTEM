@@ -40,7 +40,6 @@
                     <th>GRN Date</th>
                     <th>GRN Amount</th>
                     <th>Indent Total</th>
-                    <th>Created At</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -80,8 +79,7 @@
                     <td>${grn.IndentNo}</td>
                     <td>${new Date(grn.GrnDate).toLocaleDateString()}</td>
                     <td class="numeric-cell">${formatNumber(grn.GrnAmount)}</td>
-                     <td class="numeric-cell">${matchingIndent ? formatNumber(matchingIndent.Total) : ''}</td>
-                    <td>${new Date(grn.CreatedAt).toLocaleString()}</td>
+                    <td class="numeric-cell">${matchingIndent ? formatNumber(matchingIndent.Total) : ''}</td>
                     <td>
                         <button class="edit-btn" onclick="editGRN('${grn.GrnNo}')">
                             <i class="fas fa-edit"></i>
