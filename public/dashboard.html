@@ -34,6 +34,9 @@
             <button id="exportDeletedToExcel" class="export-btn">
                 <i class="fas fa-file-excel"></i> Export Deleted Indents
             </button>
+            <button id="exportAddIndentsToExcel" class="export-btn">
+                <i class="fas fa-file-excel"></i> AddIndents Report
+            </button>
         </div>
         <table id="indentsTable">
             <thead>
@@ -378,7 +381,72 @@
             }
         });
 
-        // Add these functions to your existing script
+        document.getElementById('exportAddIndentsToExcel').addEventListener('click', async function () {
+            try {
+                // Fetch AddIndents data from the server
+                const response = await fetch('/api/addindents/report');
+                const addIndents = await response.json();
+
+                // Create a new workbook
+                const workbook = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet('AddIndents Report');
+
+                // Define headers
+                const headers = [
+                    'Indent No',
+                    'Ref TV No',
+                    'Add Date',
+                    'Add Currency',
+                    'Add Base Value',
+                    'Add Value',
+                    'Add Reimbursement',
+                    'Add Harring and Transport',
+                    'Add VAT',
+                    'Add NBT',
+                    'Add Advance',
+                    'Add Commission',
+                    'Add Total',
+                    'Created At'
+                ];
+
+                worksheet.addRow(headers);
+
+                // Add data rows
+                addIndents.forEach(indent => {
+                    worksheet.addRow([
+                        indent.IndentNo,
+                        indent.RefTvNo,
+                        new Date(indent.AddDate).toLocaleDateString(),
+                        indent.AddCurrency,
+                        indent.AddBaseValue,
+                        indent.AddValue,
+                        indent.AddReimbursement,
+                        indent.AddHarringAndTransport,
+                        indent.AddVAT,
+                        indent.AddNBT,
+                        indent.AddAdvance,
+                        indent.AddCommission,
+                        indent.AddTotal,
+                        new Date(indent.CreatedAt).toLocaleString()
+                    ]);
+                });
+
+                // Save the workbook
+                workbook.xlsx.writeBuffer().then(function (buffer) {
+                    const blob = new Blob([buffer], {
+                        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                    });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'addindents_report.xlsx';
+                    link.click();
+                });
+            } catch (error) {
+                console.error('Error exporting AddIndents report:', error);
+                alert('Error exporting AddIndents report');
+            }
+        });
+
         function showGrnModal(indentNo) {
             document.getElementById('grnModal').style.display = 'block';
             document.getElementById('grnIndentNo').value = indentNo;

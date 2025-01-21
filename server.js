@@ -575,7 +575,6 @@ app.delete('/api/grn/:grnNo', async (req, res) => {
     }
 });
 
-// Add this new endpoint after your existing endpoints
 app.get('/api/deleted-indents', async (req, res) => {
     try {
         await sql.connect(sqlConfig);
@@ -589,6 +588,21 @@ app.get('/api/deleted-indents', async (req, res) => {
         res.json(result.recordset);
     } catch (err) {
         console.error('Error fetching deleted indents:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/addindents/report', async (req, res) => {
+    try {
+        await sql.connect(sqlConfig);
+        const result = await sql.query(`
+            SELECT *
+            FROM AddIndents
+            ORDER BY CreatedAt DESC
+        `);
+        res.json(result.recordset);
+    } catch (err) {
+        console.error('Error fetching AddIndents report:', err);
         res.status(500).json({ error: err.message });
     }
 });
