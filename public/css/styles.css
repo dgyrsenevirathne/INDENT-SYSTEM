@@ -265,8 +265,8 @@ button[type="submit"]:hover {
 
 .add-supplier-btn {
     padding: 8px 16px;
-    background-color: #1ABC9C;
-    color: white;
+    background-color: yellow;
+    color: black;
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -275,7 +275,7 @@ button[type="submit"]:hover {
 }
 
 .add-supplier-btn:hover {
-    background-color: #149B7F;
+    background-color: rgb(117, 255, 62);
 }
 
 .add-supplier-btn:active {
