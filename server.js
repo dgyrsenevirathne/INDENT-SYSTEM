@@ -136,7 +136,8 @@ app.get('/api/indents', async (req, res) => {
     try {
         await sql.connect(sqlConfig);
         const result = await sql.query(`
-            SELECT i.*, s.SupplierName 
+            SELECT i.*, s.SupplierName,
+                   i.Total as IndentTotal  
             FROM Indents i 
             LEFT JOIN Suppliers s ON i.SupplierID = s.SupplierID
             WHERE i.Status = 1

@@ -39,6 +39,7 @@
                     <th>Indent No</th>
                     <th>GRN Date</th>
                     <th>GRN Amount</th>
+                    <th>Indent Total</th>
                     <th>Created At</th>
                     <th>Action</th>
                 </tr>
@@ -54,6 +55,9 @@
             try {
                 const response = await fetch('/api/grn');
                 const grnData = await response.json();
+                const indentResponse = await fetch('/api/indents');
+                const indentData = await indentResponse.json();
+
                 const tbody = document.querySelector('#grnTable tbody');
                 const grnFilter = document.getElementById('grnNoFilter').value.trim();
                 const indentFilter = document.getElementById('indentNoFilter').value.trim();
@@ -68,25 +72,30 @@
                     });
                 }
 
-                tbody.innerHTML = filteredData.map(grn => `
-                    <tr>
-                        <td>${grn.GrnNo}</td>
-                        <td>${grn.IndentNo}</td>
-                        <td>${new Date(grn.GrnDate).toLocaleDateString()}</td>
-                        <td class="numeric-cell">${formatNumber(grn.GrnAmount)}</td>
-                        <td>${new Date(grn.CreatedAt).toLocaleString()}</td>
-                        <td>
-                            <button class="edit-btn" onclick="editGRN('${grn.GrnNo}')">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="delete-btn" onclick="deleteGRN('${grn.GrnNo}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `).join('');
-            } catch (error) {
-                console.error('Error loading GRN data:', error);
+                tbody.innerHTML = filteredData.map(grn => {
+                    const matchingIndent = indentData.find(i => i.IndentNo === grn.IndentNo);
+                    return `
+                <tr>
+                    <td>${grn.GrnNo}</td>
+                    <td>${grn.IndentNo}</td>
+                    <td>${new Date(grn.GrnDate).toLocaleDateString()}</td>
+                    <td class="numeric-cell">${formatNumber(grn.GrnAmount)}</td>
+                     <td class="numeric-cell">${matchingIndent ? formatNumber(matchingIndent.Total) : ''}</td>
+                    <td>${new Date(grn.CreatedAt).toLocaleString()}</td>
+                    <td>
+                        <button class="edit-btn" onclick="editGRN('${grn.GrnNo}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="delete-btn" onclick="deleteGRN('${grn.GrnNo}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+                }).join('');
+            } catch (err) {
+                console.error('Error loading GRN data:', err);
+                alert('Error loading GRN data');
             }
         }
 
