@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRN Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
+</head>
+
+<body>
+    <div class="nav-wrapper">
+        <div class="nav-container">
+            <h1 class="nav-title">Indent Management System</h1>
+            <div class="nav-tabs">
+                <a href="index.html" class="nav-tab">Create Indent</a>
+                <a href="dashboard.html" class="nav-tab">Dashboard</a>
+                <a href="grndashboard.html" class="nav-tab active">GRN Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="filter-container">
+            <input type="text" id="grnNoFilter" placeholder="Filter by GRN No">
+            <input type="text" id="indentNoFilter" placeholder="Filter by Indent No">
+            <button id="filterButton">Filter</button>
+            <button id="exportToExcel" class="export-btn">
+                <i class="fas fa-file-excel"></i> Export to Excel
+            </button>
+        </div>
+        <table id="grnTable">
+            <thead>
+                <tr>
+                    <th>GRN No</th>
+                    <th>Indent No</th>
+                    <th>GRN Date</th>
+                    <th>GRN Amount</th>
+                    <th>Created At</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Will be populated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        async function loadGRNData() {
+            try {
+                const response = await fetch('/api/grn');
+                const grnData = await response.json();
+                const tbody = document.querySelector('#grnTable tbody');
+                const grnFilter = document.getElementById('grnNoFilter').value.trim();
+                const indentFilter = document.getElementById('indentNoFilter').value.trim();
+
+                let filteredData = grnData;
+
+                if (grnFilter || indentFilter) {
+                    filteredData = grnData.filter(grn => {
+                        const matchGRN = !grnFilter || grn.GrnNo.toLowerCase().includes(grnFilter.toLowerCase());
+                        const matchIndent = !indentFilter || grn.IndentNo.toLowerCase().includes(indentFilter.toLowerCase());
+                        return matchGRN && matchIndent;
+                    });
+                }
+
+                tbody.innerHTML = filteredData.map(grn => `
+                    <tr>
+                        <td>${grn.GrnNo}</td>
+                        <td>${grn.IndentNo}</td>
+                        <td>${new Date(grn.GrnDate).toLocaleDateString()}</td>
+                        <td class="numeric-cell">${formatNumber(grn.GrnAmount)}</td>
+                        <td>${new Date(grn.CreatedAt).toLocaleString()}</td>
+                        <td>
+                            <button class="edit-btn" onclick="editGRN('${grn.GrnNo}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="delete-btn" onclick="deleteGRN('${grn.GrnNo}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading GRN data:', error);
+            }
+        }
+
+        function formatNumber(number) {
+            return number ? number.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }) : '0.00';
+        }
+
+        async function deleteGRN(grnNo) {
+            if (confirm('Are you sure you want to delete this GRN?')) {
+                try {
+                    const response = await fetch(`/api/grn/${encodeURIComponent(grnNo)}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        alert('GRN deleted successfully');
+                        loadGRNData();
+                    } else {
+                        const error = await response.json();
+                        throw new Error(error.message || 'Failed to delete GRN');
+                    }
+                } catch (error) {
+                    console.error('Error deleting GRN:', error);
+                    alert('Error deleting GRN: ' + error.message);
+                }
+            }
+        }
+
+        function editGRN(grnNo) {
+            // Implement edit functionality or redirect to edit page
+            alert('Edit functionality to be implemented');
+        }
+
+        document.getElementById('exportToExcel').addEventListener('click', function () {
+            const table = document.getElementById('grnTable');
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('GRN Data');
+
+            // Add headers
+            const headers = [];
+            for (let i = 0; i < table.rows[0].cells.length - 1; i++) {
+                headers.push(table.rows[0].cells[i].textContent);
+            }
+            worksheet.addRow(headers);
+
+            // Add data rows
+            for (let i = 1; i < table.rows.length; i++) {
+                const row = [];
+                for (let j = 0; j < table.rows[i].cells.length - 1; j++) {
+                    row.push(table.rows[i].cells[j].textContent);
+                }
+                worksheet.addRow(row);
+            }
+
+            // Generate Excel file
+            workbook.xlsx.writeBuffer().then(buffer => {
+                const blob = new Blob([buffer], {
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'grn_data.xlsx';
+                link.click();
+            });
+        });
+
+        // Filter functionality
+        document.getElementById('filterButton').addEventListener('click', loadGRNData);
+        document.getElementById('grnNoFilter').addEventListener('input', loadGRNData);
+        document.getElementById('indentNoFilter').addEventListener('input', loadGRNData);
+
+        // Initial load
+        document.addEventListener('DOMContentLoaded', loadGRNData);
+    </script>
+</body>
+
+</html>

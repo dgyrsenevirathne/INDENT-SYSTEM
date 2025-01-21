@@ -160,6 +160,21 @@ tr:nth-child(even) {
     box-shadow: 0 0 5px rgba(76, 175, 80, 0.2);
 }
 
+#grnNoFilter {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 200px;
+    transition: border-color 0.3s ease;
+}
+
+#grnNoFilter:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.2);
+}
+
 /* Filter Button */
 #filterButton {
     padding: 8px 16px;

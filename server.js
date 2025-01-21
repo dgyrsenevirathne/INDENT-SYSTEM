@@ -540,6 +540,40 @@ app.get('/api/grn/:indentNo', async (req, res) => {
     }
 });
 
+app.get('/api/grn', async (req, res) => {
+    try {
+        await sql.connect(sqlConfig);
+        const result = await sql.query(`
+            SELECT * FROM GRN 
+            ORDER BY CreatedAt DESC
+        `);
+        res.json(result.recordset);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete('/api/grn/:grnNo', async (req, res) => {
+    try {
+        await sql.connect(sqlConfig);
+        const request = new sql.Request();
+        request.input('grnNo', sql.VarChar, req.params.grnNo);
+
+        const result = await request.query(`
+            DELETE FROM GRN 
+            WHERE GrnNo = @grnNo
+        `);
+
+        if (result.rowsAffected[0] > 0) {
+            res.json({ message: 'GRN deleted successfully' });
+        } else {
+            res.status(404).json({ message: 'GRN not found' });
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
