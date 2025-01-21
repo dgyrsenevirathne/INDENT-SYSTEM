@@ -31,6 +31,9 @@
             <button id="exportToExcel" class="export-btn">
                 <i class="fas fa-file-excel"></i> Export to Excel
             </button>
+            <button id="exportDeletedToExcel" class="export-btn">
+                <i class="fas fa-file-excel"></i> Export Deleted Indents
+            </button>
         </div>
         <table id="indentsTable">
             <thead>
@@ -301,6 +304,78 @@
                 link.download = 'indents.xlsx';
                 link.click();
             });
+        });
+
+        document.getElementById('exportDeletedToExcel').addEventListener('click', async function () {
+            try {
+                // Fetch deleted indents from the server
+                const response = await fetch('/api/deleted-indents');
+                const deletedIndents = await response.json();
+
+                // Create a new workbook
+                const workbook = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet('Deleted Indents');
+
+                // Define headers
+                const headers = [
+                    'Indent No',
+                    'Date',
+                    'Currency',
+                    'Base Value',
+                    'Value',
+                    'Reimbursement',
+                    'Harring and Transport',
+                    'VAT',
+                    'NBT',
+                    'Advance',
+                    'Commission',
+                    'Total',
+                    'Complex Reference',
+                    'Item',
+                    'Supplier',
+                    'Indent Type',
+                    'Deleted Date'
+                ];
+
+                worksheet.addRow(headers);
+
+                // Add data rows
+                deletedIndents.forEach(indent => {
+                    worksheet.addRow([
+                        indent.IndentNo,
+                        new Date(indent.IndentDate).toLocaleDateString(),
+                        indent.Currency,
+                        indent.BaseValue,
+                        indent.Value,
+                        indent.Reimbursement,
+                        indent.HarringAndTransport,
+                        indent.VAT,
+                        indent.NBT,
+                        indent.Advance,
+                        indent.Commission,
+                        indent.Total,
+                        indent.ComplexReference,
+                        indent.Item,
+                        indent.SupplierName,
+                        indent.IndentType,
+                        new Date(indent.DeletedDate).toLocaleDateString()
+                    ]);
+                });
+
+                // Save the workbook
+                workbook.xlsx.writeBuffer().then(function (buffer) {
+                    const blob = new Blob([buffer], {
+                        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                    });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'deleted_indents.xlsx';
+                    link.click();
+                });
+            } catch (error) {
+                console.error('Error exporting deleted indents:', error);
+                alert('Error exporting deleted indents');
+            }
         });
 
         // Add these functions to your existing script
