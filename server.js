@@ -607,6 +607,45 @@ app.get('/api/addindents/report', async (req, res) => {
     }
 });
 
+// Add this to server.js
+app.put('/api/grn/:grnNo', async (req, res) => {
+    try {
+        await sql.connect(sqlConfig);
+        const request = new sql.Request();
+
+        request.input('oldGrnNo', sql.VarChar, req.params.grnNo);
+        request.input('newGrnNo', sql.VarChar, req.body.grnNo);
+        request.input('grnDate', sql.Date, new Date(req.body.grnDate));
+        request.input('grnAmount', sql.Decimal(18, 2), req.body.grnAmount);
+
+        // Check if new GRN number already exists (if changed)
+        if (req.params.grnNo !== req.body.grnNo) {
+            const checkResult = await request.query`
+                SELECT GrnNo FROM GRN WHERE GrnNo = ${req.body.grnNo}
+            `;
+            if (checkResult.recordset.length > 0) {
+                return res.status(400).json({ error: 'New GRN number already exists' });
+            }
+        }
+
+        const result = await request.query(`
+            UPDATE GRN 
+            SET GrnNo = @newGrnNo,
+                GrnDate = @grnDate,
+                GrnAmount = @grnAmount
+            WHERE GrnNo = @oldGrnNo
+        `);
+
+        if (result.rowsAffected[0] > 0) {
+            res.json({ message: 'GRN updated successfully' });
+        } else {
+            res.status(404).json({ message: 'GRN not found' });
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

@@ -47,9 +47,32 @@
                 <!-- Will be populated by JavaScript -->
             </tbody>
         </table>
+        <div id="editGrnModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeEditGrnModal()">&times;</span>
+                <h2>Edit GRN Details</h2>
+                <form id="editGrnForm">
+                    <input type="hidden" id="editGrnOldNo">
+                    <div class="form-group">
+                        <label for="editGrnNo">GRN No:</label>
+                        <input type="text" id="editGrnNo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editGrnDate">Date:</label>
+                        <input type="date" id="editGrnDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="editGrnAmount">Amount:</label>
+                        <input type="number" id="editGrnAmount" step="0.01" required>
+                    </div>
+                    <button type="submit" class="submit-btn">Update GRN</button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script>
+
         async function loadGRNData() {
             try {
                 const response = await fetch('/api/grn');
@@ -73,16 +96,17 @@
 
                 tbody.innerHTML = filteredData.map(grn => {
                     const matchingIndent = indentData.find(i => i.IndentNo === grn.IndentNo);
+                    const dateStr = new Date(grn.GrnDate).toISOString().split('T')[0]; // Format date for input
                     return `
-                <tr>
+                <tr data-grn-no="${grn.GrnNo}" data-grn-date="${dateStr}" data-grn-amount="${grn.GrnAmount}">
                     <td>${grn.GrnNo}</td>
                     <td>${grn.IndentNo}</td>
                     <td>${new Date(grn.GrnDate).toLocaleDateString()}</td>
                     <td class="numeric-cell">${formatNumber(grn.GrnAmount)}</td>
                     <td class="numeric-cell">${matchingIndent ? formatNumber(matchingIndent.Total) : ''}</td>
                     <td>
-                        <button class="edit-btn" onclick="editGRN('${grn.GrnNo}')">
-                            <i class="fas fa-edit"></i>
+                        <button class="edit-btn" onclick="editGRN('${grn.GrnNo}', '${dateStr}', ${grn.GrnAmount})">
+                        <i class="fas fa-edit"></i>
                         </button>
                         <button class="delete-btn" onclick="deleteGRN('${grn.GrnNo}')">
                             <i class="fas fa-trash"></i>
@@ -125,10 +149,57 @@
             }
         }
 
+        // Replace the existing editGRN function with this new implementation
         function editGRN(grnNo) {
-            // Implement edit functionality or redirect to edit page
-            alert('Edit functionality to be implemented');
+            const row = document.querySelector(`tr[data-grn-no="${grnNo}"]`);
+            const grnDate = row.querySelector('td:nth-child(3)').getAttribute('data-date');
+            const grnAmount = row.querySelector('td:nth-child(4)').textContent.replace(/[^0-9.-]+/g, '');
+
+            document.getElementById('editGrnOldNo').value = grnNo;
+            document.getElementById('editGrnNo').value = grnNo;
+            document.getElementById('editGrnDate').value = grnDate;
+            document.getElementById('editGrnAmount').value = grnAmount;
+            document.getElementById('editGrnModal').style.display = 'block';
         }
+
+        function closeEditGrnModal() {
+            document.getElementById('editGrnModal').style.display = 'none';
+            document.getElementById('editGrnForm').reset();
+        }
+
+        // Add event listener for edit form submission
+        document.getElementById('editGrnForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const formData = {
+                grnNo: document.getElementById('editGrnNo').value,
+                grnDate: document.getElementById('editGrnDate').value,
+                grnAmount: parseFloat(document.getElementById('editGrnAmount').value)
+            };
+
+            const oldGrnNo = document.getElementById('editGrnOldNo').value;
+
+            try {
+                const response = await fetch(`/api/grn/${encodeURIComponent(oldGrnNo)}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert('GRN updated successfully!');
+                    closeEditGrnModal();
+                    loadGRNData(); // Refresh the table
+                } else {
+                    alert('Error updating GRN: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
 
         document.getElementById('exportToExcel').addEventListener('click', function () {
             const table = document.getElementById('grnTable');
