@@ -454,7 +454,7 @@ app.post('/api/suppliers', async (req, res) => {
     }
 });
 
-// Update the createGrnTable function
+// Update createGrnTable function
 const createGrnTable = async () => {
     try {
         await sql.connect(sqlConfig);
@@ -471,19 +471,29 @@ const createGrnTable = async () => {
             END
         `);
 
-        // Then create GRN table with foreign key
+        // Then create GRN table with Status column
         await sql.query(`
             IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='GRN' AND xtype='U')
-            CREATE TABLE GRN (
-                GrnID INT PRIMARY KEY IDENTITY(1,1),
-                IndentNo VARCHAR(50),
-                GrnNo VARCHAR(50) UNIQUE,
-                GrnDate DATE,
-                GrnAmount DECIMAL(18,2),
-                CreatedAt DATETIME DEFAULT GETDATE(),
-                CONSTRAINT FK_GRN_Indents FOREIGN KEY (IndentNo) 
-                REFERENCES Indents(IndentNo)
+            BEGIN
+                CREATE TABLE GRN (
+                    GrnID INT PRIMARY KEY IDENTITY(1,1),
+                    IndentNo VARCHAR(50),
+                    GrnNo VARCHAR(50) UNIQUE,
+                    GrnDate DATE,
+                    GrnAmount DECIMAL(18,2),
+                    Status INT DEFAULT 1,
+                    CreatedAt DATETIME DEFAULT GETDATE(),
+                    CONSTRAINT FK_GRN_Indents FOREIGN KEY (IndentNo) 
+                    REFERENCES Indents(IndentNo)
+                )
+            END
+            ELSE IF NOT EXISTS (
+                SELECT * FROM sys.columns 
+                WHERE object_id = OBJECT_ID('GRN') AND name = 'Status'
             )
+            BEGIN
+                ALTER TABLE GRN ADD Status INT DEFAULT 1
+            END
         `);
     } catch (err) {
         console.error('Error creating GRN table:', err);
@@ -546,6 +556,7 @@ app.get('/api/grn', async (req, res) => {
         await sql.connect(sqlConfig);
         const result = await sql.query(`
             SELECT * FROM GRN 
+            WHERE Status = 1
             ORDER BY CreatedAt DESC
         `);
         res.json(result.recordset);
@@ -561,7 +572,8 @@ app.delete('/api/grn/:grnNo', async (req, res) => {
         request.input('grnNo', sql.VarChar, req.params.grnNo);
 
         const result = await request.query(`
-            DELETE FROM GRN 
+            UPDATE GRN 
+            SET Status = 0
             WHERE GrnNo = @grnNo
         `);
 
