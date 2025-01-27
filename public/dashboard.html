@@ -337,6 +337,8 @@
                     'Item',
                     'Supplier',
                     'Indent Type',
+                    'GRN No',
+                    'GRN Amount',
                     'Deleted Date'
                 ];
 
@@ -361,6 +363,8 @@
                         indent.Item,
                         indent.SupplierName,
                         indent.IndentType,
+                        indent.GrnNo || 'N/A',
+                        indent.GrnAmount ? indent.GrnAmount.toFixed(2) : 'N/A',
                         new Date(indent.DeletedDate).toLocaleDateString()
                     ]);
                 });

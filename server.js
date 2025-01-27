@@ -591,9 +591,12 @@ app.get('/api/deleted-indents', async (req, res) => {
     try {
         await sql.connect(sqlConfig);
         const result = await sql.query(`
-            SELECT i.*, s.SupplierName
+            SELECT i.*, s.SupplierName,
+                   g.GrnNo,
+                   g.GrnAmount
             FROM Indents i 
             LEFT JOIN Suppliers s ON i.SupplierID = s.SupplierID
+            LEFT JOIN GRN g ON i.IndentNo = g.IndentNo AND g.Status = 0
             WHERE i.Status = 0
             ORDER BY i.DeletedDate DESC
         `);
