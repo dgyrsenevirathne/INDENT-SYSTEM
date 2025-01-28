@@ -256,38 +256,47 @@ app.post('/api/addindents', async (req, res) => {
 });
 
 app.put('/api/indents/:indentNo/status', async (req, res) => {
+    let transaction;
     try {
         await sql.connect(sqlConfig);
-        const request = new sql.Request();
+        transaction = new sql.Transaction();
+        await transaction.begin();
 
-        // Clean the indent number by removing all spaces
+        const request = new sql.Request(transaction);
         const indentNo = decodeURIComponent(req.params.indentNo).replace(/\s+/g, '');
-
-        const query = `
-            UPDATE Indents
-            SET Status = 0, DeletedDate = GETDATE()
-            WHERE REPLACE(IndentNo, ' ', '') = @indentNo
-        `;
-
-        request.input('indentNo', sql.VarChar, indentNo);
 
         console.log('Attempting to delete indent:', indentNo);
 
         const checkQuery = `SELECT IndentNo FROM Indents WHERE REPLACE(IndentNo, ' ', '') = @indentNo`;
+        request.input('indentNo', sql.VarChar, indentNo);
         const checkResult = await request.query(checkQuery);
 
         if (checkResult.recordset.length === 0) {
-            console.log('Record not found in database. Available records:');
-            // Debug: List all indent numbers for comparison
+            console.log('Record not found in database.');
             const allIndents = await request.query('SELECT IndentNo FROM Indents');
             console.log(allIndents.recordset.map(r => r.IndentNo));
+            await transaction.rollback();
             return res.status(404).json({ message: 'Indent not found' });
         }
 
-        const result = await request.query(query);
-        res.json({ success: true, message: 'Indent deleted successfully' });
+        // Update both Indents and GRN tables
+        const updateQuery = `
+            UPDATE Indents
+            SET Status = 0, DeletedDate = GETDATE()
+            WHERE REPLACE(IndentNo, ' ', '') = @indentNo;
+
+            UPDATE GRN
+            SET Status = 0
+            WHERE REPLACE(IndentNo, ' ', '') = @indentNo;
+        `;
+
+        await request.query(updateQuery);
+        await transaction.commit();
+
+        res.json({ success: true, message: 'Indent and related GRN records deleted successfully' });
     } catch (err) {
-        console.error('Error updating indent status:', err);
+        if (transaction) await transaction.rollback();
+        console.error('Error updating status:', err);
         res.status(500).json({ error: err.message });
     }
 });
