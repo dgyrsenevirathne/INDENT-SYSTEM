@@ -244,3 +244,15 @@ tr:nth-child(even) {
 td .button-group:last-child {
     margin-bottom: 0;
 }
+
+.modal input[type="password"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.modal form {
+    margin-top: 20px;
+}

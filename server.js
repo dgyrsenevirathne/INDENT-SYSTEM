@@ -692,6 +692,44 @@ app.put('/api/grn/:grnNo', async (req, res) => {
     }
 });
 
+const createDeletePasswordTable = async () => {
+    try {
+        await sql.connect(sqlConfig);
+        await sql.query(`
+            IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='DeletePassword' AND xtype='U')
+            BEGIN
+                CREATE TABLE DeletePassword (
+                    Id INT PRIMARY KEY IDENTITY(1,1),
+                    Password VARCHAR(50) NOT NULL
+                )
+                
+                -- Insert default password
+                INSERT INTO DeletePassword (Password) VALUES ('admin123')
+            END
+        `);
+    } catch (err) {
+        console.error('Error creating DeletePassword table:', err);
+    }
+};
+
+app.post('/api/verify-delete-password', async (req, res) => {
+    try {
+        await sql.connect(sqlConfig);
+        const request = new sql.Request();
+        request.input('password', sql.VarChar, req.body.password);
+
+        const result = await request.query(`
+            SELECT COUNT(*) as count 
+            FROM DeletePassword 
+            WHERE Password = @password
+        `);
+
+        res.json({ valid: result.recordset[0].count > 0 });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
@@ -699,3 +737,4 @@ app.listen(PORT, () => {
 
 createAddIndentsTable();
 createGrnTable();
+createDeletePasswordTable();
