@@ -230,3 +230,17 @@ tr:nth-child(even) {
 .edit-btn:hover {
     background-color: #FF8C00;
 }
+
+.button-group {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 5px;
+}
+
+.button-group button {
+    flex: 1;
+}
+
+td .button-group:last-child {
+    margin-bottom: 0;
+}

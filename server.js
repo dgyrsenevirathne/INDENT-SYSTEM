@@ -137,9 +137,12 @@ app.get('/api/indents', async (req, res) => {
         await sql.connect(sqlConfig);
         const result = await sql.query(`
             SELECT i.*, s.SupplierName,
-                   i.Total as IndentTotal  
+                   i.Total as IndentTotal,
+                   g.GrnNo,
+                   g.GrnAmount   
             FROM Indents i 
             LEFT JOIN Suppliers s ON i.SupplierID = s.SupplierID
+            LEFT JOIN GRN g ON i.IndentNo = g.IndentNo AND g.Status = 1
             WHERE i.Status = 1
         `);
         res.json(result.recordset);
@@ -331,35 +334,20 @@ app.get('/api/indents/:indentNo', async (req, res) => {
     }
 });
 
-// Update indent
 app.put('/api/indents/:indentNo', async (req, res) => {
+    let transaction;
     try {
         await sql.connect(sqlConfig);
-        const request = new sql.Request();
-        const oldIndentNo = decodeURIComponent(req.params.indentNo);
-        const newIndentNo = req.body.indentNo;
+        transaction = new sql.Transaction();
+        await transaction.begin();
 
-        // Add debug logging
-        console.log('Updating indent:', {
-            oldIndentNo,
-            newIndentNo,
-            requestBody: req.body
-        });
+        const request = new sql.Request(transaction);
 
-        // Verify indent exists before update
-        const checkResult = await request.query`
-         SELECT COUNT(*) as count 
-         FROM Indents 
-         WHERE IndentNo = ${oldIndentNo}`;
-
-        if (checkResult.recordset[0].count === 0) {
-            return res.status(404).json({ error: 'Indent not found' });
-        }
-
-        request.input('oldIndentNo', sql.VarChar, oldIndentNo);
-        request.input('newIndentNo', sql.VarChar, newIndentNo);
+        // Add all parameters with unique names
+        request.input('oldIndentNo', sql.VarChar, decodeURIComponent(req.params.indentNo));
+        request.input('newIndentNo', sql.VarChar, req.body.indentNo);
         request.input('complexRef', sql.VarChar, req.body.complexRef);
-        request.input('date', sql.Date, new Date(req.body.date));
+        request.input('indentDate', sql.Date, new Date(req.body.date));
         request.input('currency', sql.VarChar, req.body.currency);
         request.input('baseValue', sql.Decimal(18, 2), req.body.baseValue);
         request.input('value', sql.Decimal(18, 2), req.body.value);
@@ -371,60 +359,94 @@ app.put('/api/indents/:indentNo', async (req, res) => {
         request.input('commission', sql.Decimal(18, 2), req.body.commission);
         request.input('total', sql.Decimal(18, 2), req.body.total);
         request.input('complex', sql.VarChar, req.body.complex);
-        request.input('item', sql.NVarChar(sql.MAX), req.body.item);
+        request.input('item', sql.VarChar, req.body.item);
         request.input('supplierId', sql.Int, req.body.supplierId);
-        request.input('indentType', sql.NVarChar(50), req.body.indentType);
+        request.input('indentType', sql.VarChar, req.body.indentType);
 
-        const updateResult = await request.query(`
-            UPDATE Indents 
-            SET IndentNo = @newIndentNo,
-                ComplexReference = @complexRef,
-                IndentDate = @date,
-                Currency = @currency,
-                BaseValue = @baseValue,
-                Value = @value,
-                Reimbursement = @reimbursement,
-                HarringAndTransport = @harringTransport,
-                VAT = @vat,
-                NBT = @nbt,
-                Advance = @advance,
-                Commission = @commission,
-                Total = @total,
-                Complex = @complex,
-                Item = @item,
-                SupplierID = @supplierId,
-                IndentType = @indentType
-            WHERE IndentNo = @oldIndentNo
-        `);
+        // Check if indent number is changing
+        const isIndentNoChanging = req.params.indentNo !== req.body.indentNo;
 
-        // Update AddIndents table
-        if (oldIndentNo !== newIndentNo) {
-            const transaction = new sql.Transaction();
-            await transaction.begin();
-            const updateAddIndentsRequest = new sql.Request(transaction);
-            updateAddIndentsRequest.input('newIndentNo', sql.VarChar, newIndentNo);
-            updateAddIndentsRequest.input('oldIndentNo', sql.VarChar, oldIndentNo);
-            await updateAddIndentsRequest.query(`
-        UPDATE AddIndents
-        SET IndentNo = @newIndentNo
-        WHERE IndentNo = @oldIndentNo
-    `);
-            await transaction.commit();
+        if (isIndentNoChanging) {
+            // Check for duplicates
+            const checkResult = await request.query(
+                `SELECT COUNT(*) as count FROM Indents 
+                 WHERE IndentNo = @newIndentNo 
+                 AND IndentNo != @oldIndentNo`
+            );
+
+            if (checkResult.recordset[0].count > 0) {
+                throw new Error('New indent number already exists');
+            }
+
+            // Insert new record
+            await request.query(
+                `INSERT INTO Indents (
+                    IndentNo, ComplexReference, IndentDate, Currency, 
+                    BaseValue, Value, Reimbursement, HarringAndTransport,
+                    VAT, NBT, Advance, Commission, Total, Complex,
+                    Item, SupplierID, IndentType
+                ) VALUES (
+                    @newIndentNo, @complexRef, @indentDate, @currency,
+                    @baseValue, @value, @reimbursement, @harringTransport,
+                    @vat, @nbt, @advance, @commission, @total, @complex,
+                    @item, @supplierId, @indentType
+                )`
+            );
+
+            // Update related tables
+            await request.query(
+                `UPDATE GRN SET IndentNo = @newIndentNo 
+                 WHERE IndentNo = @oldIndentNo;
+                 
+                 UPDATE AddIndents SET IndentNo = @newIndentNo 
+                 WHERE IndentNo = @oldIndentNo;`
+            );
+
+            // Delete old record
+            await request.query(`DELETE FROM Indents WHERE IndentNo = @oldIndentNo`);
+        } else {
+            // Direct update for non-indent number changes
+            await request.query(
+                `UPDATE Indents
+                 SET ComplexReference = @complexRef,
+                     IndentDate = @indentDate,
+                     Currency = @currency,
+                     BaseValue = @baseValue,
+                     Value = @value,
+                     Reimbursement = @reimbursement,
+                     HarringAndTransport = @harringTransport,
+                     VAT = @vat,
+                     NBT = @nbt,
+                     Advance = @advance,
+                     Commission = @commission,
+                     Total = @total,
+                     Complex = @complex,
+                     Item = @item,
+                     SupplierID = @supplierId,
+                     IndentType = @indentType
+                 WHERE IndentNo = @oldIndentNo`
+            );
         }
 
-        // Return the updated indent data
-        const updatedIndent = await request.query(`SELECT * FROM Indents WHERE IndentNo = @newIndentNo`, {
-            newIndentNo: newIndentNo
-        });
+        await transaction.commit();
+
+        // Get updated record
+        const getRequest = new sql.Request();
+        getRequest.input('indentNo', sql.VarChar, req.body.indentNo);
+        const updatedIndent = await getRequest.query(
+            'SELECT * FROM Indents WHERE IndentNo = @indentNo'
+        );
 
         res.json({
             success: true,
-            message: oldIndentNo !== newIndentNo ? 'Indent updated successfully' : 'Indent updated successfully, but Indent No remains the same',
+            message: 'Indent updated successfully',
             updatedRecord: updatedIndent.recordset[0]
         });
+
     } catch (err) {
+        if (transaction) await transaction.rollback();
         console.error('Error updating indent:', err);
-        res.status(500).json({ error: 'An error occurred while updating the indent' });
+        res.status(500).json({ error: err.message });
     }
 });
 

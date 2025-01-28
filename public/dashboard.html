@@ -104,6 +104,13 @@
                 const filterInput = document.getElementById('indentNoFilter');
                 const filterButton = document.getElementById('filterButton');
 
+                // Add GRN columns to table header if not exists
+                const headerRow = document.querySelector('#indentsTable thead tr');
+                if (!headerRow.querySelector('th[data-column="grnNo"]')) {
+                    headerRow.insertBefore(document.createElement('th'), headerRow.lastElementChild).textContent = 'GRN No';
+                    headerRow.insertBefore(document.createElement('th'), headerRow.lastElementChild).textContent = 'GRN Amount';
+                }
+
                 // Filter input
                 const filterValue = filterInput.value.trim();
 
@@ -130,26 +137,35 @@
                         <td class="numeric-cell">${formatNumber(indent.Advance)}</td>
                         <td class="numeric-cell">${formatNumber(indent.Commission)}</td>
                         <td class="numeric-cell">${formatNumber(indent.Total)}</td>
+                        <td class="numeric-cell">${indent.GrnNo || ''}</td>
+                        <td class="numeric-cell">${formatNumber(indent.GrnAmount) || ''}</td>
                         <td>
-                         <button class="details-btn" data-complex-ref="${indent.ComplexReference}" 
-                         data-item="${indent.Item}" 
-                         data-supplier="${indent.SupplierName}"
-                         data-indent-type="${indent.IndentType}">
-                         <i class="fas fa-info-circle"></i>
-                         </button>
-                        <button class="add-btn" onclick="addValues('${indent.IndentNo}')">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                         <button class="edit-btn" onclick="editIndent('${indent.IndentNo}')">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                         <button class="delete-btn" onclick="deleteIndent('${indent.IndentNo}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                         <button class="grn-btn" onclick="showGrnModal('${indent.IndentNo}')">
-                            GRN
-                        </button>
-                    </td>
+                         <div class="button-group">
+        <button class="details-btn" 
+                data-complex-ref="${indent.ComplexReference}" 
+                data-item="${indent.Item}" 
+                data-supplier="${indent.SupplierName}"
+                data-indent-type="${indent.IndentType}">
+            <i class="fas fa-info-circle"></i>
+        </button>
+        <button class="add-btn" onclick="addValues('${indent.IndentNo}')">
+            <i class="fas fa-plus"></i>
+        </button>
+    </div>
+    <div class="button-group">
+        <button class="edit-btn" onclick="editIndent('${indent.IndentNo}')">
+            <i class="fas fa-edit"></i>
+        </button>
+        <button class="delete-btn" onclick="deleteIndent('${indent.IndentNo}')">
+            <i class="fas fa-trash"></i>
+        </button>
+    </div>
+    <div class="button-group">
+        <button class="grn-btn" onclick="showGrnModal('${indent.IndentNo}')">
+            GRN
+        </button>
+    </div>
+                        </td>
                     </tr>
                 `).join('');
             } catch (error) {
